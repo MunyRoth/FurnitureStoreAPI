@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
 
@@ -20,6 +21,13 @@ Route::middleware('guest')->group(function () {
         Route::get('/products/{id}', 'show');
         Route::put('/products/{id}', 'update');
         Route::delete('/products/{id}', 'destroy');
+    });
+
+
+    ///Categories Controller
+    Route::controller(CategoriesController::class)->group(function () {
+        Route::get('/categories', 'retrieveAllCategories');
+        Route::get('/categories_by_id/{id}', 'retrieveCategoryById');
     });
 });
 
