@@ -7,7 +7,6 @@ use App\Http\Requests\UpdateProductRequest;
 use App\Models\Image;
 use App\Models\Product;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
-use Illuminate\Http\Response;
 
 class ProductController extends Controller
 {
@@ -19,7 +18,7 @@ class ProductController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Product $products): Response
+    public function index(Product $products)
     {
         return Response([
             'status' => 200,
@@ -33,7 +32,7 @@ class ProductController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreProductRequest $request, Product $product): Response
+    public function store(StoreProductRequest $request, Product $product)
     {
         $imageUrl = Cloudinary::upload($request->file('image')->getRealPath(), [
             'folder' => 'FurnitureStore'
@@ -48,36 +47,36 @@ class ProductController extends Controller
         $image->imageUrl = $imageUrl;
         $product->imageUrls()->save($image);
 
-        return Response([
-            'status' => 201,
-            'message' => 'created successfully',
-            'data' => $product
-        ]);
+        return $this->Res(
+            $product,
+            'created successfully',
+            201
+        );
     }
 
     /**
      * Display the specified resource.
      */
-    public function show($id): Response
+    public function show($id)
     {
         $product = Product::find($id);
-        if ($product) return Response([
-            'status' => 200,
-            'message' => 'gotten successfully',
-            'data' => $product->load('imageUrls')
-        ], 200);
+        if ($product) return $this->Res(
+            $product->load('imageUrls'),
+            'gotten successfully',
+            200
+        );
 
-        return Response([
-            'status' => 404,
-            'message' => 'not found',
-            'data' => null
-        ], 404);
+        return $this->Res(
+            null,
+            'not found',
+            404
+        );
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateProductRequest $request, $id): Response
+    public function update(UpdateProductRequest $request, $id)
     {
         $product = Product::find($id);
 
@@ -100,41 +99,42 @@ class ProductController extends Controller
                 ]);
             }
 
-            return Response([
-                'status' => 200,
-                'message' => 'updated successfully',
-                'data' => $product
-            ], 200);
+
+            return $this->Res(
+                $product,
+                'updated successfully',
+                200
+            );
         }
 
-        return Response([
-            'status' => 404,
-            'message' => 'not found',
-            'data' => null
-        ], 404);
+        return $this->Res(
+            null,
+            'not found',
+            404
+        );
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id): Response
+    public function destroy($id)
     {
         $product = Product::find($id);
 
         if($product) {
             $product->delete();
 
-            return Response([
-                'status' => 200,
-                'message' => 'deleted successfully',
-                'data' => null
-            ], 200);
+            return $this->Res(
+                null,
+                'deleted successfully',
+                200
+            );
         }
 
-        return Response([
-            'status' => 404,
-            'message' => 'not found',
-            'data' => null
-        ], 404);
+        return $this->Res(
+            null,
+            'not found',
+            404
+        );
     }
 }
