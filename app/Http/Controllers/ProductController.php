@@ -10,17 +10,24 @@ use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class ProductController extends Controller
 {
+
+
+    public function searchByName($name)  {
+        
+    }
     /**
      * Display a listing of the resource.
      */
     public function index(Product $products)
     {
-        return $this->Res(
-            $products->select('id', 'name', 'price')->with('imageUrl')->get(),
-            'gotten successfully',
-             200
-        );
+        return Response([
+            'status' => 200,
+            'message' => 'gotten successfully',
+            'data' => $products->select('id', 'name', 'price', 'imageUrl')->get()
+        ], 200);
     }
+
+    
 
     /**
      * Store a newly created resource in storage.

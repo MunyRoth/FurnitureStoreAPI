@@ -13,6 +13,7 @@ class Product extends Model
     use HasFactory;
 
     protected $fillable = [
+        'id',
         'name',
         'price',
         'description'
@@ -27,12 +28,15 @@ class Product extends Model
     public function imageUrl(): HasMany
     {
         return $this->hasMany(Image::class);
-        // return $this->hasMany(Image::class)->oldestOfMany();
 
     }
 
     public function category(): BelongsTo {
-        return $this->belongsTo(Category::class);
-        
+        return $this->belongsTo(Category::class); 
     }
+
+    public function shoppingCarts()
+{
+    return $this->hasMany(shoppingCarts::class);
+}
 }

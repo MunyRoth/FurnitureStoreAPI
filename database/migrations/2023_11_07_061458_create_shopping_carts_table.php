@@ -11,13 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('images', function (Blueprint $table) {
+        Schema::create('shopping_carts', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('product_id');
-            $table->foreign('product_id')->references('id')->on('products')->constrained()
-                ->onDelete('cascade');
-            // $table->foreignId('product_id')->constrained()->onDelete('cascade');
-            $table->string("imageUrl");
+            $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
+            $table->boolean("paid");
+            $table->integer('qty');
             $table->timestamps();
         });
     }
@@ -27,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('images');
+        Schema::dropIfExists('shopping_carts');
     }
 };
