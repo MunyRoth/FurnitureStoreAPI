@@ -11,6 +11,11 @@ use Illuminate\Http\Response;
 
 class ProductController extends Controller
 {
+
+
+    public function searchByName($name)  {
+        
+    }
     /**
      * Display a listing of the resource.
      */
@@ -19,9 +24,11 @@ class ProductController extends Controller
         return Response([
             'status' => 200,
             'message' => 'gotten successfully',
-            'data' => $products->select('id', 'name', 'price')->with('imageUrl')->get()
+            'data' => $products->select('id', 'name', 'price', 'imageUrl')->get()
         ], 200);
     }
+
+    
 
     /**
      * Store a newly created resource in storage.

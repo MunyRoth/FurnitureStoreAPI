@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ShoppingCartController;
+use App\Models\ShoppingCart;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -29,5 +31,19 @@ Route::middleware('guest')->group(function () {
         Route::get('/categories', 'retrieveAllCategories');
         Route::get('/categories_by_id/{id}', 'retrieveCategoryById');
     });
+
+
+    //Rotue of ShoppingCart 
+    Route::controller(ShoppingCartController::class)->group(function () {
+        Route::get('/shoppingCartUnPaid', 'retrieveAllProductUnPaid');
+        Route::get('/shoppingCartPaid', 'retrieveProductPaid');
+        Route::put('/qtyOperation/{id}', 'qtyOperation');
+        Route::get('/retrieveProductUnPaidById/{id}', 'retrieveProductUnPaidById');
+        Route::post('/addProductToShoppingCart', 'addProductsToShoppingCart');
+    });
+
+     
+
+
 });
 
