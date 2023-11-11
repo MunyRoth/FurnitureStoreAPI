@@ -20,11 +20,8 @@ class ProductController extends Controller
      */
     public function index(Product $products)
     {
-        return Response([
-            'status' => 200,
-            'message' => 'gotten successfully',
-            'data' => $products->select('id', 'name', 'price', 'imageUrl')->get()
-        ], 200);
+        $data = $products->select('id', 'name', 'price', 'imageUrl')->get();
+        return $this->Res($data, "got data successfully", 200);
     }
 
     
@@ -40,12 +37,15 @@ class ProductController extends Controller
 
         $product->name = $request->name;
         $product->price = $request->price;
+        $product->category_id = $request->category_id;
         $product->description = $request->description;
+        $product->imageUrl = $imageUrl;
         $product->save();
 
         $image = new Image;
-        $image->imageUrl = $imageUrl;
-        $product->imageUrls()->save($image);
+        $image->product_id = $product->id;
+        $image->imageUrl = $product->imageUrl;
+        $image->save();
 
         return $this->Res(
             $product,
