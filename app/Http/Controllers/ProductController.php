@@ -22,7 +22,7 @@ class ProductController extends Controller
     public function index(Product $products)
     {
         $data = $products
-            ->select('products.id', 'products.name', 'products.price', 'products.imageUrl', 'favourites.is_favourited')
+            ->select('products.id', 'products.name', 'products.price', 'products.imageUrl', 'favourites.is_favourited as isFavorite')
             ->leftJoin('favourites', 'products.id', '=', 'favourites.product_id')
             ->get();
     

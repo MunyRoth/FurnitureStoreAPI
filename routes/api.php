@@ -60,7 +60,7 @@ Route::middleware('auth:api')->group(function () {
     ]);
 
     // Favourite Routes
-    Route::resource('favourite', FavouriteController::class)->only([
+    Route::resource('favorite', FavouriteController::class)->only([
         'index',
         'store'
     ]);
