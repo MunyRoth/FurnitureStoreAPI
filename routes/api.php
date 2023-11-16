@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\CategoriesController;
+use App\Http\Controllers\FavouriteController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\ShoppingCartController;
@@ -56,5 +57,10 @@ Route::middleware('auth:api')->group(function () {
     // Product Routes
     Route::resource('products', ProductController::class)->only([
         'destroy'
+    ]);
+
+    // Favourite Routes
+    Route::resource('favourite', FavouriteController::class)->only([
+        'store'
     ]);
 });
