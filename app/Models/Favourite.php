@@ -10,6 +10,7 @@ class Favourite extends Model
     use HasFactory;
 
     protected $fillable = [
-        'product_id'
+        'product_id',
+        'is_favourited'
     ];
 }

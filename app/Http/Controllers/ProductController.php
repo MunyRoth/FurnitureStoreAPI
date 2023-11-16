@@ -21,7 +21,11 @@ class ProductController extends Controller
      */
     public function index(Product $products)
     {
-        $data = $products->select('id', 'name', 'price', 'imageUrl')->get();
+        $data = $products
+            ->select('products.id', 'products.name', 'products.price', 'products.imageUrl', 'favourites.is_favourited')
+            ->leftJoin('favourites', 'products.id', '=', 'favourites.product_id')
+            ->get();
+    
         return $this->Res($data, "got data successfully", 200);
     }
 
