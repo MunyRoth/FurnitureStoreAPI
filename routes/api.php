@@ -4,7 +4,6 @@ use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\ShoppingCartController;
-use App\Models\ShoppingCart;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -18,23 +17,22 @@ use Illuminate\Support\Facades\Route;
 |
 */
 Route::middleware('guest')->group(function () {
-    Route::controller(ProductController::class)->group(function () {
-        Route::post('/products', 'store');
-        Route::get('/products', 'index');
-        Route::get('/products/{id}', 'show');
-        Route::put('/products/{id}', 'update');
-        Route::delete('/products/{id}', 'destroy');
-    });
+    // Product Routes
+    Route::resource('products', ProductController::class)->only([
+        'store',
+        'index',
+        'show',
+        'update',
+        'destroy'
+    ]);
 
-
-    ///Categories Controller
+    // Categories Routes
     Route::controller(CategoriesController::class)->group(function () {
         Route::get('/categories', 'retrieveAllCategories');
         Route::get('/categories_by_id/{id}', 'retrieveCategoryById');
     });
 
-
-    //Rotue of ShoppingCart 
+    // Custom ShoppingCart Routes
     Route::controller(ShoppingCartController::class)->group(function () {
         Route::get('/shoppingCartUnPaid', 'retrieveAllProductUnPaid');
         Route::get('/shoppingCartPaid', 'retrieveProductPaid');
@@ -43,9 +41,7 @@ Route::middleware('guest')->group(function () {
         Route::post('/addProductToShoppingCart', 'addProductsToShoppingCart');
     });
 
+    // Search Products Route
     Route::get('/search_product_by_name', [SearchController::class, 'searchProductByName']);
-
-
-
 });
 

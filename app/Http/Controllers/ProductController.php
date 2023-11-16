@@ -7,14 +7,15 @@ use App\Http\Requests\UpdateProductRequest;
 use App\Models\Image;
 use App\Models\Product;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ProductController extends Controller
 {
-
-
-    public function searchByName($name)  {
+    public function searchByName($name)
+    {
         
     }
+
     /**
      * Display a listing of the resource.
      */
@@ -23,8 +24,6 @@ class ProductController extends Controller
         $data = $products->select('id', 'name', 'price', 'imageUrl')->get();
         return $this->Res($data, "got data successfully", 200);
     }
-
-    
 
     /**
      * Store a newly created resource in storage.
@@ -35,10 +34,7 @@ class ProductController extends Controller
             'folder' => 'FurnitureStore'
         ])->getSecurePath();
 
-        $product->name = $request->name;
-        $product->price = $request->price;
-        $product->category_id = $request->category_id;
-        $product->description = $request->description;
+        $product->fill($request->only(['name', 'price', 'category_id', 'description']));
         $product->imageUrl = $imageUrl;
         $product->save();
 
@@ -47,11 +43,7 @@ class ProductController extends Controller
         $image->imageUrl = $product->imageUrl;
         $image->save();
 
-        return $this->Res(
-            $product,
-            'created successfully',
-            201
-        );
+        return $this->Res($product, 'created successfully', 201);
     }
 
     /**
@@ -59,18 +51,12 @@ class ProductController extends Controller
      */
     public function show($id)
     {
-        $product = Product::find($id);
-        if ($product) return $this->Res(
-            $product->load('imageUrls'),
-            'gotten successfully',
-            200
-        );
-
-        return $this->Res(
-            null,
-            'not found',
-            404
-        );
+        try {
+            $product = Product::with('imageUrls')->findOrFail($id);
+            return $this->Res($product, 'gotten successfully', 200);
+        } catch (ModelNotFoundException $e) {
+            return $this->Res(null, 'not found', 404);
+        }
     }
 
     /**
@@ -78,40 +64,13 @@ class ProductController extends Controller
      */
     public function update(UpdateProductRequest $request, $id)
     {
-        $product = Product::find($id);
-
-        if($product) {
-            if ($request->name != '') {
-                $product->update([
-                    'name' => $request->name
-                ]);
-            }
-
-            if ($request->price != '') {
-                $product->update([
-                    'price' => $request->price
-                ]);
-            }
-
-            if ($request->description != '') {
-                $product->update([
-                    'description' => $request->description
-                ]);
-            }
-
-
-            return $this->Res(
-                $product,
-                'updated successfully',
-                200
-            );
+        try {
+            $product = Product::findOrFail($id);
+            $product->update($request->only(['name', 'price', 'description']));
+            return $this->Res($product, 'updated successfully', 200);
+        } catch (ModelNotFoundException $e) {
+            return $this->Res(null, 'not found', 404);
         }
-
-        return $this->Res(
-            null,
-            'not found',
-            404
-        );
     }
 
     /**
@@ -119,22 +78,12 @@ class ProductController extends Controller
      */
     public function destroy($id)
     {
-        $product = Product::find($id);
-
-        if($product) {
+        try {
+            $product = Product::findOrFail($id);
             $product->delete();
-
-            return $this->Res(
-                null,
-                'deleted successfully',
-                200
-            );
+            return $this->Res(null, 'deleted successfully', 200);
+        } catch (ModelNotFoundException $e) {
+            return $this->Res(null, 'not found', 404);
         }
-
-        return $this->Res(
-            null,
-            'not found',
-            404
-        );
     }
 }

@@ -14,10 +14,11 @@ class SearchController extends Controller
 
         $products = Product::where('name', 'LIKE', '%' . $request->name . '%')->get();
 
-        if (count($products) > 0) {
-            return $this->Res($products, "product found", 200);
-        } else {
+        // Use the isEmpty method to check if the collection is empty
+        if ($products->isEmpty()) {
             return $this->Res(null, "Product not found", 404);
         }
+
+        return $this->Res($products, "Product found", 200);
     }
 }

@@ -5,72 +5,97 @@ namespace App\Http\Controllers;
 use App\Http\Requests\AddProductToShoppingCart;
 use App\Models\Product;
 use App\Models\ShoppingCart;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 
 class ShoppingCartController extends Controller
 {
-
-    //function Add Product To Shopping Cart
+    // Add Product To Shopping Cart
     public function addProductsToShoppingCart(AddProductToShoppingCart $request)
     {
+        // Create a new instance of ShoppingCart
         $shoppingCart = new ShoppingCart();
-        //check product have on db or not
-        $check = Product::find($request['product_id']);
-        if (!$check){
-            return $this->Res(null, "The product is not yet existed.", 200);
+
+        // Check if the product exists in the database
+        try {
+            Product::findOrFail($request['product_id']);
+        } catch (ModelNotFoundException $e) {
+            return $this->Res(null, "The product is not yet existed.", 404);
         }
-        //check the product already has on shopping cart table or not
+
+        // Check if the product is already in the shopping cart
         $checkProductHaveAddorNot = $shoppingCart->firstWhere('product_id', $request['product_id']);
-        if($checkProductHaveAddorNot){
-            return $this->Res(null, "The product is existed add.", 200);
+        if ($checkProductHaveAddorNot) {
+            // Return a response if the product is already in the shopping cart
+            return $this->Res(null, "The product is existed add.", 409);
         }
-        //if product not yet has add it to shopping cart
+
+        // Add the product to the shopping cart
         $shoppingCart->product_id = $request['product_id'];
         $shoppingCart->paid = 0;
         $shoppingCart->qty = 1;
         $shoppingCart->save();
-        return $this->Res($checkProductHaveAddorNot, "add product to shoppincart successfully", 200);
+
+        // Return a success response
+        return $this->Res($checkProductHaveAddorNot, "Add product to shopping cart successfully", 200);
     }
 
-    //query product that not yet paid
+    // Retrieve all products that are not yet paid
     public function retrieveAllProductUnPaid()
     {
-
+        // Retrieve all products that are not yet paid with their associated products
         $data = ShoppingCart::where('paid', 0)->with('product')->get();
-        // $data = ShoppingCart::where('paid', 0)->get();
 
-        return $this->Res($data, "gotten successfully", 200);
+        // Return the data with a success message
+        return $this->Res($data, "Products retrieved successfully", 200);
     }
 
-    //query product that already paided
+    // Retrieve products that are already paid
     public function retrieveProductPaid()
     {
+        // Retrieve products that are already paid with their associated products
         $data = ShoppingCart::where("paid", 1)->with('product')->get();
-        return $this->Res($data, "gotten successfully", 200);
+
+        // Return the data with a success message
+        return $this->Res($data, "Products retrieved successfully", 200);
     }
 
 
+    // Retrieve a product that is not yet paid by its ID
     public function retrieveProductUnPaidById($id)
     {
+        // Retrieve a product that is not yet paid by its ID with its associated product
+        $data = ShoppingCart::findOrFail($id)->with('product')->get();
 
-        $data = ShoppingCart::find($id)->with('product')->get();
-        return $this->Res($data, "gotten successfully", 200);
+        // Return the data with a success message
+        return $this->Res($data, "Product retrieved successfully", 200);
     }
 
-    //increase or decrease Quantity
+    // Increase or decrease quantity
     public function qtyOperation(Request $request, $id)
     {
-        $data = ShoppingCart::find($id);
-        if ($data) {
+        try {
+            // Find the shopping cart record by ID
+            $data = ShoppingCart::findOrFail($id);
+            
+            // Check if the requested quantity is greater than the current quantity
             if ($request->qty > $data->qty) {
                 $data->qty++;
                 $data->save();
-                return $this->Res("product id: $data->product_id", 'Increase Qty done', 200);
-            } else if ($request->qty < $data->qty) {
+                // Return a success response if quantity is increased
+                return $this->Res("Product ID: $data->product_id", 'Increase Qty done', 200);
+            } elseif ($request->qty < $data->qty) {
                 $data->qty--;
                 $data->save();
-                return $this->Res("product id: $data->product_id", 'Decrease Qty done', 200);
-            } else return $this->Res("product id: $data->product_id", 'Qty still not change', 200);
-        } else return $this->Res(null, "This product cannot found.", 200);
+                // Return a success response if quantity is decreased
+                return $this->Res("Product ID: $data->product_id", 'Decrease Qty done', 200);
+            } else {
+                // Return a response if quantity remains unchanged
+                return $this->Res("Product ID: $data->product_id", 'Qty still not changed', 200);
+            }
+        } catch(ModelNotFoundException $e) {
+            // Return a response if the product is not found
+            return $this->Res(null, "This product cannot be found.", 404);
+        }
     }
 }
