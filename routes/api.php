@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SearchController;
@@ -16,14 +17,20 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
+
 Route::middleware('guest')->group(function () {
+    // Register
+    Route::post('register', [AuthController::class, 'register']);
+
+    // Login
+    Route::post('login', [AuthController::class, 'login']);
+
     // Product Routes
     Route::resource('products', ProductController::class)->only([
         'store',
         'index',
         'show',
-        'update',
-        'destroy'
+        'update'
     ]);
 
     // Categories Routes
@@ -45,3 +52,9 @@ Route::middleware('guest')->group(function () {
     Route::get('/search_product_by_name', [SearchController::class, 'searchProductByName']);
 });
 
+Route::middleware('auth:api')->group(function () {
+    // Product Routes
+    Route::resource('products', ProductController::class)->only([
+        'destroy'
+    ]);
+});
