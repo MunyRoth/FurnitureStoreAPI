@@ -47,6 +47,7 @@ Route::middleware('guest')->group(function () {
         Route::put('/qtyOperation/{id}', 'qtyOperation');
         Route::get('/retrieveProductUnPaidById/{id}', 'retrieveProductUnPaidById');
         Route::post('/addProductToShoppingCart', 'addProductsToShoppingCart');
+        Route::delete('/deleteProductCart/{id}', 'deleteProductCartById');
     });
 
     // Search Products Route

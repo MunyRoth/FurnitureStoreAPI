@@ -71,31 +71,66 @@ class ShoppingCartController extends Controller
         return $this->Res($data, "Product retrieved successfully", 200);
     }
 
-    // Increase or decrease quantity
+    // // Increase or decrease quantity
+    // public function qtyOperation(Request $request, $id)
+    // {
+    //     try {
+    //         // Find the shopping cart record by ID
+    //         $data = ShoppingCart::findOrFail($id);
+
+    //         // Check if the requested quantity is greater than the current quantity
+    //         if ($request->qty > $data->qty) {
+    //             $data->qty++;
+    //             $data->save();
+    //             // Return a success response if quantity is increased
+    //             return $this->Res("Product ID: $data->product_id", 'Increase Qty done', 200);
+    //         } elseif ($request->qty < $data->qty) {
+    //             $data->qty--;
+    //             $data->save();
+    //             // Return a success response if quantity is decreased
+    //             return $this->Res("Product ID: $data->product_id", 'Decrease Qty done', 200);
+    //         } else {
+    //             // Return a response if quantity remains unchanged
+    //             return $this->Res("Product ID: $data->product_id", 'Qty still not changed', 200);
+    //         }
+    //     } catch(ModelNotFoundException $e) {
+    //         // Return a response if the product is not found
+    // return $this->Res(null, "This product cannot be found.", 404);
+    //     }
+    // }
+    //increase or decrease Quantity
     public function qtyOperation(Request $request, $id)
     {
+
         try {
-            // Find the shopping cart record by ID
-            $data = ShoppingCart::findOrFail($id);
-            
-            // Check if the requested quantity is greater than the current quantity
+            $data = ShoppingCart::findOrFail($id);;
             if ($request->qty > $data->qty) {
-                $data->qty++;
+                $data->qty = $request->qty;
                 $data->save();
-                // Return a success response if quantity is increased
-                return $this->Res("Product ID: $data->product_id", 'Increase Qty done', 200);
-            } elseif ($request->qty < $data->qty) {
-                $data->qty--;
+                 // Return a success response if quantity is increased
+                return $this->Res("product id: $data->product_id", 'Increase Qty done', 200);
+            } else if ($request->qty < $data->qty) {
+                $data->qty = $request->qty;
                 $data->save();
-                // Return a success response if quantity is decreased
-                return $this->Res("Product ID: $data->product_id", 'Decrease Qty done', 200);
-            } else {
-                // Return a response if quantity remains unchanged
-                return $this->Res("Product ID: $data->product_id", 'Qty still not changed', 200);
+                 // Return a success response if quantity is decreased
+                return $this->Res("product id: $data->product_id", 'Decrease Qty done', 200);        
+            }else {
+                  // Return a response if quantity remains unchanged
+                  return $this->Res("Product ID: $data->product_id", 'Qty still not changed', 200);
             }
-        } catch(ModelNotFoundException $e) {
-            // Return a response if the product is not found
+        } catch (ModelNotFoundException $e) {
             return $this->Res(null, "This product cannot be found.", 404);
         }
+    }
+
+
+    public function deleteProductCartById($id)
+    {
+        $data = ShoppingCart::find($id);
+        if (!$data) {
+            return $this->Res(null, 'Data is not found.', 404);
+        }
+        $data->delete();
+        return $this->Res(null, "Delete Done", 200);
     }
 }
