@@ -26,7 +26,7 @@ class ProductController extends Controller
         $user = auth()->user();
 
         // Determine the condition for the isFavorite column
-        $isFavoriteCondition = $user ? 'IF(favourites.user_id = ' . $user->id . ' OR favourites.product_id IS NOT NULL, 1, 0)' : '0';
+        $isFavoriteCondition = $user ? 'IF(favourites.user_id = ' . $user->id . ' OR favourites.product_id IS NOT NULL, favourites.is_favourited, 0)' : '0';
 
         // Fetch data from the products table, including the isFavorite column
         $data = $products
