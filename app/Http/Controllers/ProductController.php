@@ -23,7 +23,7 @@ class ProductController extends Controller
     public function index(Product $products)
     {
         // Get the authenticated user, if any
-        $user = auth()->user();
+        $user = auth()->guard('api')->user();
 
         // Determine the condition for the isFavorite column
         $isFavoriteCondition = $user ? 'IF(favourites.user_id = ' . $user->id . ' OR favourites.product_id IS NOT NULL, favourites.is_favourited, 0)' : '0';

@@ -55,6 +55,9 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware('auth:api')->group(function () {
+    // Logout
+    Route::get('logout', [AuthController::class, 'logout']);
+
     // Product Routes
     Route::resource('products', ProductController::class)->only([
         'destroy'
