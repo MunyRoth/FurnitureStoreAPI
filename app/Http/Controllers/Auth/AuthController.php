@@ -3,11 +3,15 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\UpdateProfileRequest;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+
 
 class AuthController extends Controller
 {
@@ -26,12 +30,14 @@ class AuthController extends Controller
      */
     public function register(Request $request)
     {
+
         // Validate the request
         $this->validate($request, [
             'name' => 'required|string',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|min:8'
+            'email' => 'required|string|email|max:255',
+            'password' => 'required|min:8',
         ]);
+
 
         // Check if email is already registered
         if (User::where('email', $request->email)->exists()) {
@@ -67,13 +73,42 @@ class AuthController extends Controller
 
         // Check email and password
         if (!auth()->attempt(['email' => $request->email, 'password' => $request->password])) {
-            return $this->Res(null, 'Invalid credentials', 400);
+            return $this->Res(null, "Invalid credentials", 400);
         }
 
         // Create and set the expiration time for the access token
         $data = $this->createToken($this->guard->user());
 
-        return $this->Res($data, 'Logged in successfully', 200);
+        return $this->Res($data, "Logged in successfully", 200);
+    }
+
+    /**
+     * store a user.
+     *
+     * @param Request $request
+     */
+    public function store(UpdateProfileRequest $request)
+    {
+        $user = Auth::guard('api')->user();
+
+    
+        try {   
+            if ($request->file('avatar')) {
+                // Upload the image to Cloudinary
+                $avatar = Cloudinary::upload($request->file('avatar')->getRealPath(), [
+                    'folder' => 'FurnitureStore'
+                ])->getSecurePath();
+                $user->avatar = $avatar;
+            }
+            // Update user name if it's present
+            if ($request->name) {
+                $user->name = $request->name;
+            }
+            $user->save();
+            return $this->Res(null, "Update Profile Successfully", 200);
+        } catch (\Exception $e) {
+            return $this->Res(null, $e->getMessage(), 500);
+        }
     }
 
     /**
@@ -88,6 +123,8 @@ class AuthController extends Controller
 
         return $this->Res(null, 'Logged out successfully', 200);
     }
+
+
 
     /**
      * Create and set the expiration time for the access token.
@@ -107,5 +144,12 @@ class AuthController extends Controller
             'token_type' => 'Bearer',
             'expires_at' => Carbon::parse($tokenResult->token->expires_at)->toDateTimeString(),
         ];
+    }
+
+    public function getProfile()
+    {
+        $user = Auth::guard('api')->user();
+
+        return $this->Res($user, "Got data success", 200);
     }
 }

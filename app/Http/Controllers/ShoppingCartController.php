@@ -71,55 +71,43 @@ class ShoppingCartController extends Controller
         return $this->Res($data, "Product retrieved successfully", 200);
     }
 
-    // // Increase or decrease quantity
-    // public function qtyOperation(Request $request, $id)
-    // {
-    //     try {
-    //         // Find the shopping cart record by ID
-    //         $data = ShoppingCart::findOrFail($id);
-
-    //         // Check if the requested quantity is greater than the current quantity
-    //         if ($request->qty > $data->qty) {
-    //             $data->qty++;
-    //             $data->save();
-    //             // Return a success response if quantity is increased
-    //             return $this->Res("Product ID: $data->product_id", 'Increase Qty done', 200);
-    //         } elseif ($request->qty < $data->qty) {
-    //             $data->qty--;
-    //             $data->save();
-    //             // Return a success response if quantity is decreased
-    //             return $this->Res("Product ID: $data->product_id", 'Decrease Qty done', 200);
-    //         } else {
-    //             // Return a response if quantity remains unchanged
-    //             return $this->Res("Product ID: $data->product_id", 'Qty still not changed', 200);
-    //         }
-    //     } catch(ModelNotFoundException $e) {
-    //         // Return a response if the product is not found
-    // return $this->Res(null, "This product cannot be found.", 404);
-    //     }
-    // }
     //increase or decrease Quantity
-    public function qtyOperation(Request $request, $id)
+    public function qtyOperation(Request $request)
     {
-
         try {
-            $data = ShoppingCart::findOrFail($id);;
-            if ($request->qty > $data->qty) {
-                $data->qty = $request->qty;
-                $data->save();
-                 // Return a success response if quantity is increased
-                return $this->Res("product id: $data->product_id", 'Increase Qty done', 200);
-            } else if ($request->qty < $data->qty) {
-                $data->qty = $request->qty;
-                $data->save();
-                 // Return a success response if quantity is decreased
-                return $this->Res("product id: $data->product_id", 'Decrease Qty done', 200);        
-            }else {
-                  // Return a response if quantity remains unchanged
-                  return $this->Res("Product ID: $data->product_id", 'Qty still not changed', 200);
+            // Get the request data as an array
+            $requests = $request->json()->all();
+
+            // Check if $requests is an array of requests or a single request
+            if (!is_array(reset($requests))) {
+                // If it's a single request, convert it to an array of requests
+                $requests = [$requests];
             }
+
+            // Extract an array of product IDs
+            $product_ids = array_column($requests, 'id');
+
+            // Find all shopping cart items with the specified product IDs
+            $data = ShoppingCart::whereIn('product_id', $product_ids)->get();
+
+            // Iterate over each shopping cart item and update the quantity
+            $data->each(function ($item) use ($requests) {
+                $product_id = $item->product_id;
+
+                // Find the corresponding request data for the current product ID
+                $request_data = collect($requests)->firstWhere('id', $product_id);
+
+                //if qty > 0 qty can be update
+                if ($request_data && $request_data['qty'] > 0) {
+                    // Update the quantity for the current shopping cart item
+                    $item->update(['qty' => $request_data['qty']]);
+                }
+            });
+
+            // Return a success response
+            return $this->Res(null, 'Quantity updated successfully', 200);
         } catch (ModelNotFoundException $e) {
-            return $this->Res(null, "This product cannot be found.", 404);
+            return $this->Res(null, "One or more products cannot be found.", 404);
         }
     }
 
