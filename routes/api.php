@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\FavouriteController;
+use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\ShoppingCartController;
@@ -31,7 +32,15 @@ Route::middleware('guest')->group(function () {
         'store',
         'index',
         'show',
-        'update'
+        'update',    
+    ]);
+
+    Route::get('retrieveProducts', [ProductController::class, 'retrieveProducts']);
+    Route::resource('history', HistoryController::class)->only([
+        'store',
+        'index',
+        'show',
+        'update',    
     ]);
 
     // Categories Routes
@@ -44,7 +53,7 @@ Route::middleware('guest')->group(function () {
     Route::controller(ShoppingCartController::class)->group(function () {
         Route::get('/shoppingCartUnPaid', 'retrieveAllProductUnPaid');
         Route::get('/shoppingCartPaid', 'retrieveProductPaid');
-        Route::put('/qtyOperation/{id}', 'qtyOperation');
+        Route::put('/qtyOperation', 'qtyOperation');
         Route::get('/retrieveProductUnPaidById/{id}', 'retrieveProductUnPaidById');
         Route::post('/addProductToShoppingCart', 'addProductsToShoppingCart');
         Route::delete('/deleteProductCart/{id}', 'deleteProductCartById');
@@ -57,6 +66,9 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth:api')->group(function () {
     // Logout
     Route::get('logout', [AuthController::class, 'logout']);
+    Route::get('loadProfile', [AuthController::class, 'getProfile']);
+
+    Route::put('updateProfile', [AuthController::class, 'store']);
 
     // Product Routes
     Route::resource('products', ProductController::class)->only([

@@ -17,6 +17,14 @@ class ProductController extends Controller
         
     }
 
+    public function retrieveProducts()  {
+
+        $data = Product::get();
+         // Return the response with the fetched data
+         return $this->Res($data, 'got data successfully', 200);
+        
+    }
+
     /**
      * Display a listing of the resource.
      */
