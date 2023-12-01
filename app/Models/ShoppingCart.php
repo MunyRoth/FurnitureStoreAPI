@@ -13,6 +13,7 @@ class ShoppingCart extends Model
 
     protected $fillable = [
         'id',
+        'user_id',
         'qty',
         'paid'
     ];
@@ -21,4 +22,6 @@ class ShoppingCart extends Model
     {
         return $this->belongsTo(Product::class);
     }
+
+    
 }
