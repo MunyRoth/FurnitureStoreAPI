@@ -29,14 +29,12 @@ Route::middleware('guest')->group(function () {
 
     // Product Routes
     Route::resource('products', ProductController::class)->only([
-        'store',
         'index',
         'show',
-        'update',    
     ]);
 
-    Route::get('retrieveProducts', [ProductController::class, 'retrieveProducts']);
- 
+    Route::get('retrieveProducts', [ProductController::class, 'index']);
+
     // Categories Routes
     Route::controller(CategoriesController::class)->group(function () {
         Route::get('/categories', 'retrieveAllCategories');
@@ -50,11 +48,25 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth:api')->group(function () {
     // Logout
     Route::get('logout', [AuthController::class, 'logout']);
+    // Get user Profile
     Route::get('loadProfile', [AuthController::class, 'getProfile']);
-    //Update user Profile
+    // Update user Profile
     Route::put('updateProfile', [AuthController::class, 'store']);
 
-    
+    // Categories Routes
+    Route::resource('categories', CategoriesController::class)->only([
+        'store',
+        'update',
+        'destroy'
+    ]);
+
+    // Product Routes
+    Route::resource('products', ProductController::class)->only([
+        'store',
+        'update',
+        'destroy'
+    ]);
+
     // Custom ShoppingCart Routes
     Route::controller(ShoppingCartController::class)->group(function () {
         Route::get('/shoppingCartUnPaid', 'retrieveAllProductUnPaid');
@@ -70,14 +82,7 @@ Route::middleware('auth:api')->group(function () {
         'store',
         'index',
         'show',
-        'update',    
-    ]);
-
-
-
-    // Product Routes
-    Route::resource('products', ProductController::class)->only([
-        'destroy'
+        'update'
     ]);
 
     // Favourite Routes

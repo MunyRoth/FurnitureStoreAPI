@@ -8,27 +8,15 @@ use App\Models\Image;
 use App\Models\Product;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
-    public function searchByName($name)
-    {
-        
-    }
-
-    public function retrieveProducts()  {
-
-        $data = Product::get();
-         // Return the response with the fetched data
-         return $this->Res($data, 'got data successfully', 200);
-        
-    }
-
     /**
      * Display a listing of the resource.
      */
-    public function index(Product $products)
+    public function index(Product $products): JsonResponse
     {
         // Get the authenticated user, if any
         $user = auth()->guard('api')->user();
@@ -49,8 +37,14 @@ class ProductController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreProductRequest $request, Product $product)
+    public function store(StoreProductRequest $request, Product $product): JsonResponse
     {
+        // Check if the product exists
+        $product = Product::where('name', $request->name)->first();
+        if ($product) {
+            return $this->Res($product, 'Product already exists', 409);
+        }
+
         // Upload the image to Cloudinary
         $imageUrl = Cloudinary::upload($request->file('image')->getRealPath(), [
             'folder' => 'FurnitureStore'
@@ -74,7 +68,7 @@ class ProductController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($id)
+    public function show($id): JsonResponse
     {
         try {
             // Find the product by ID with its associated image URLs
@@ -88,7 +82,7 @@ class ProductController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateProductRequest $request, $id)
+    public function update(UpdateProductRequest $request, $id): JsonResponse
     {
         try {
             // Find the product by ID
@@ -108,7 +102,7 @@ class ProductController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id)
+    public function destroy($id): JsonResponse
     {
         try {
             // Find the product by ID and delete it
