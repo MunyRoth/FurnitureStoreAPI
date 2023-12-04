@@ -40,8 +40,8 @@ class ProductController extends Controller
     public function store(StoreProductRequest $request, Product $product): JsonResponse
     {
         // Check if the product exists
-        $product = Product::where('name', $request->name)->first();
-        if ($product) {
+        $existproduct = Product::where('name', $request->name)->first();
+        if ($existproduct) {
             return $this->Res($product, 'Product already exists', 409);
         }
 
