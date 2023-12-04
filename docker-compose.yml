@@ -24,7 +24,7 @@ services:
       MYSQL_DATABASE: ${DB_DATABASE}
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
     volumes:
-      - ./docker-compose/mysql:/docker-entrypoint-initdb.d
+      - /var/mysql:/docker-entrypoint-initdb.d
     networks:
       - furniture-store
 
