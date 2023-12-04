@@ -16,6 +16,8 @@ services:
 #      - ./:/var/www
     networks:
       - furniture-store
+    depends_on:
+        - db
 
   db:
     image: mysql:latest
@@ -29,15 +31,18 @@ services:
       - furniture-store
 
   nginx:
-    image: nginx
-    container_name: furniture-store-nginx
+    build:
+      context: ./docker-compose/nginx
+      dockerfile: Dockerfile
     ports:
       - "80:80"
     volumes:
-      - ./:/var/www
+#      - ./:/var/www
       - ./docker-compose/nginx:/etc/nginx/conf.d/
     networks:
       - furniture-store
+    depends_on:
+        - app
 
 networks:
   furniture-store:
