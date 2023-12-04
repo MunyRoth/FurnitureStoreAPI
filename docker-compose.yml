@@ -26,7 +26,7 @@ services:
       context: ./docker-compose/nginx
       dockerfile: Dockerfile
     ports:
-      - "80:80"
+      - "8000:80"
     volumes:
       - ./docker-compose/nginx:/etc/nginx/conf.d/
     networks:
