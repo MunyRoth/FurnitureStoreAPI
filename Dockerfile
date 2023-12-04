@@ -16,7 +16,6 @@ COPY . .
 # install all of the dependencies  in composer.json
 RUN composer update
 RUN php artisan key:generate
-RUN php artisan migrate
 RUN php artisan passport:install
 
 #serve laravel
