@@ -4,16 +4,12 @@ name: furniture-store
 services:
   app:
     build:
-#      args:
-#        user: roth
-#        uid: 1000
       context: ./
       dockerfile: Dockerfile
-#    working_dir: /var/www/
-#    volumes:
-#      - ./:/var/www
     networks:
       - furniture-store
+    ports:
+        - "8080:8080"
     depends_on:
         - db
 
@@ -34,7 +30,6 @@ services:
     ports:
       - "80:80"
     volumes:
-#      - ./:/var/www
       - ./docker-compose/nginx:/etc/nginx/conf.d/
     networks:
       - furniture-store
