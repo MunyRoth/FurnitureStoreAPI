@@ -8,8 +8,6 @@ services:
       dockerfile: Dockerfile
     networks:
       - furniture-store
-    ports:
-        - "8080:8080"
     depends_on:
         - db
 
