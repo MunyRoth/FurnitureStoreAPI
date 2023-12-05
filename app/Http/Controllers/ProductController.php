@@ -70,9 +70,17 @@ class ProductController extends Controller
      */
     public function show($id): JsonResponse
     {
+        // Get the authenticated user, if any
+        $user = auth()->guard('api')->user();
+
         try {
-            // Find the product by ID with its associated image URLs
-            $product = Product::with('imageUrls', 'isFavorite')->findOrFail($id);
+            if ($user) {
+                // Find the product by ID with its associated image URLs and the isFavorite column
+                $product = Product::with('imageUrls', 'isFavorite')->findOrFail($id);
+            } else {
+                // Find the product by ID with its associated image URLs
+                $product = Product::with('imageUrls')->findOrFail($id);
+            }
             return $this->Res($product, 'gotten successfully', 200);
         } catch (ModelNotFoundException $e) {
             return $this->Res(null, 'not found', 404);
