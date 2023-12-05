@@ -20,6 +20,11 @@ class Product extends Model
         'description'
     ];
 
+    public function isFavorite(): HasOne
+    {
+        return $this->hasOne(Favourite::class);
+    }
+
     public function imageUrls(): HasMany
     {
         return $this->hasMany(Image::class);
@@ -33,7 +38,7 @@ class Product extends Model
     }
 
     public function category(): BelongsTo {
-        return $this->belongsTo(Category::class); 
+        return $this->belongsTo(Category::class);
     }
 
     public function shoppingCarts() {

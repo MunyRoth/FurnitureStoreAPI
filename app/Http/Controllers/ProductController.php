@@ -72,7 +72,7 @@ class ProductController extends Controller
     {
         try {
             // Find the product by ID with its associated image URLs
-            $product = Product::with('imageUrls')->findOrFail($id);
+            $product = Product::with('imageUrls', 'isFavorite')->findOrFail($id);
             return $this->Res($product, 'gotten successfully', 200);
         } catch (ModelNotFoundException $e) {
             return $this->Res(null, 'not found', 404);
