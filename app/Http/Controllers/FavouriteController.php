@@ -6,25 +6,38 @@ use App\Http\Requests\FavouriteRequest;
 use App\Models\Favourite;
 use App\Models\Product;
 use Illuminate\Database\Query\JoinClause;
+use Illuminate\Http\JsonResponse;
 
 class FavouriteController extends Controller
 {
     // Get All Favourites
-    public function index() {
+    public function index(): JsonResponse
+    {
+        // Method 1
         $products = Product::query()
         ->join('favourites', function (JoinClause $join) {
             $join->on('products.id', '=', 'favourites.product_id') // Adjust this based on your actual relationship
                  ->where('favourites.user_id', '=', auth()->user()->id)
                  ->where('favourites.is_favourited', '=', 1);
         })
-        ->select('products.id', 'products.name', 'products.price', 'products.imageUrl')
+        ->select('products.id', 'products.name', 'products.price', 'products.imageUrl', 'favourites.is_favourited as isFavorite')
         ->get();
-    
+
+        // Method 2
+//        $user = User::where('id', auth()->user()->id)->first();
+//
+//        $products = [];
+//        foreach ($user->favourites as $favourite) {
+//            $product = Product::where('id', $favourite->product_id)->first();
+//            $product->isFovorite = true;
+//            $products[] = $product;
+//        }
+
         return $this->Res($products, 'Product received successfully', 200);
     }
-    
+
     // Create a new Favourite
-    public function store(FavouriteRequest $request, Favourite $favourite)
+    public function store(FavouriteRequest $request, Favourite $favourite): JsonResponse
     {
         // Ensure the user is authenticated
         $user = auth()->guard('api')->user();

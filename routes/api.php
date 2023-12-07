@@ -33,8 +33,6 @@ Route::middleware('guest')->group(function () {
         'show',
     ]);
 
-    Route::get('retrieveProducts', [ProductController::class, 'index']);
-
     // Categories Routes
     Route::controller(CategoriesController::class)->group(function () {
         Route::get('/categories', 'retrieveAllCategories');

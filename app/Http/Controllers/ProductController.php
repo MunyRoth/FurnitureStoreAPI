@@ -10,6 +10,7 @@ use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ProductController extends Controller
 {
@@ -21,6 +22,10 @@ class ProductController extends Controller
         // Get the authenticated user, if any
         $user = auth()->guard('api')->user();
 
+        // Enable query logging
+        DB::enableQueryLog();
+
+        // Method 1
         // Determine the condition for the isFavorite column
         $isFavoriteCondition = $user ? 'IF(favourites.user_id = ' . $user->id . ' OR favourites.product_id IS NOT NULL, favourites.is_favourited, 0)' : '0';
 
@@ -30,8 +35,36 @@ class ProductController extends Controller
             ->leftJoin('favourites', 'products.id', '=', 'favourites.product_id')
             ->get();
 
-         // Return the response with the fetched data
-         return $this->Res($data, 'got data successfully', 200);
+        // Method 2
+//        $products = Product::get();
+//
+//        foreach ($products as $product) {
+//            $product->isFavorite = (bool) $product->isFavorite()->where('user_id', $id)->first();
+//        }
+
+        // Method 3
+        // Retrieve products with eager loading of the isFavorite relationship
+//        $products = Product::with(['isFavorite' => function ($query) use ($id) {
+//            $query->where('user_id', $id);
+//        }])->get();
+//
+//        // Set the isFavorite property for each product
+//        $products->each(function ($product) use ($id) {
+//            // Check if the relationship exists before accessing it
+//            $product->isFavorite = $product->isFavorite && $product->isFavorite->first();
+//        });
+
+        // Get the executed queries
+        $queries = DB::getQueryLog();
+
+        // Log the queries (for debugging purposes)
+        Log::info('Executed Queries: ', $queries);
+
+        // Disable query logging to prevent interference with subsequent queries
+        DB::disableQueryLog();
+
+        // Return the response with the fetched data
+        return $this->Res($data, 'got data successfully', 200);
     }
 
     /**
@@ -40,8 +73,8 @@ class ProductController extends Controller
     public function store(StoreProductRequest $request, Product $product): JsonResponse
     {
         // Check if the product exists
-        $existproduct = Product::where('name', $request->name)->first();
-        if ($existproduct) {
+        $existProduct = Product::where('name', $request->name)->first();
+        if ($existProduct) {
             return $this->Res($product, 'Product already exists', 409);
         }
 
