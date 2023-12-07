@@ -52,7 +52,7 @@ class User extends Authenticatable
         return $this->hasMany(ShoppingCart::class);
     }
 
-    public function histories()
+    public function histories(): HasMany
     {
         return $this->hasMany(Histories::class);
     }
