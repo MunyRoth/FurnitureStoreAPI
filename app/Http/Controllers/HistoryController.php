@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Histories;
 use App\Models\ShoppingCart;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class HistoryController extends Controller
 {
@@ -13,7 +14,10 @@ class HistoryController extends Controller
      */
     public function index()
     {
-        //
+        $user = auth()->guard('api')->user();
+
+
+        return $this->Res($user->histories, 'got data successfully', 200);
     }
 
     /**
@@ -53,14 +57,16 @@ class HistoryController extends Controller
         foreach ($cartItems as $cartItem) {
             Histories::create([
                 'product_id' => $cartItem->product_id,
+                'user_id' => Auth::id(),
                 'qty' => $cartItem->qty,
+                'price' => $cartItem->price
             ]);
         }
 
         // Delete records from the shopping cart
         ShoppingCart::whereIn('product_id', $productIds)->delete();
 
-        return $this->Res($cartItems, 'Payment Success', 200);
+        return $this->Res(null, 'Payment Success', 200);
     }
 
     /**
