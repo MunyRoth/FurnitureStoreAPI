@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Histories extends Model
 {
@@ -13,11 +14,14 @@ class Histories extends Model
 
     protected $fillable = [
         'product_id',
-        'qty'
+        'user_id',
+        'qty',
     ];
 
     
-    public function products() : BelongsTo {
-        return $this->belongsTo(Histories::class);
+    public function product() : BelongsTo {
+        return $this->belongsTo(Product::class);
     }
+
+
 }

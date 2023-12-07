@@ -52,8 +52,8 @@ class User extends Authenticatable
         return $this->hasMany(ShoppingCart::class);
     }
 
-    public function favourites(): HasMany
+    public function histories()
     {
-        return $this->hasMany(Favourite::class);
+        return $this->hasMany(Histories::class);
     }
 }
