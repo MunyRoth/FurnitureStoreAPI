@@ -14,10 +14,9 @@ class HistoryController extends Controller
      */
     public function index()
     {
-        $user = auth()->guard('api')->user();
+        $data = Histories::with(['product'])->where('user_id', auth()->id())->get();
 
-
-        return $this->Res($user->histories, 'got data successfully', 200);
+        return $this->Res($data, 'got data successfully', 200);
     }
 
     /**
@@ -59,7 +58,6 @@ class HistoryController extends Controller
                 'product_id' => $cartItem->product_id,
                 'user_id' => Auth::id(),
                 'qty' => $cartItem->qty,
-                'price' => $cartItem->price
             ]);
         }
 
