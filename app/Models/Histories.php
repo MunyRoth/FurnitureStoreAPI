@@ -13,6 +13,8 @@ class Histories extends Model
 
     protected $fillable = [
         'product_id',
+        'user_id',
+        'price',
         'qty'
     ];
 

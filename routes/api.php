@@ -67,8 +67,8 @@ Route::middleware('auth:api')->group(function () {
 
     // Payment Methods Routes
     Route::resource('history', HistoryController::class)->only([
-        'store',
         'index',
+        'store',
         'show',
         'update',    
     ]);
