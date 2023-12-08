@@ -4,9 +4,9 @@ name: furniture-store
 services:
     app:
         build:
-            args:
-                user: roth
-                uid: 1000
+#            args:
+#                user: roth
+#                uid: 1000
             context: ./
             dockerfile: Dockerfile
         restart: unless-stopped
@@ -31,9 +31,6 @@ services:
 
     nginx:
         image: nginx:latest
-        #    build:
-        #      context: ./docker-compose/nginx
-        #      dockerfile: Dockerfile
         restart: unless-stopped
         ports:
             - "80:80"
@@ -42,8 +39,6 @@ services:
             - ./docker-compose/nginx:/etc/nginx/conf.d/
         networks:
             - furniture-store
-#        depends_on:
-#            - app
 
 networks:
     furniture-store:
