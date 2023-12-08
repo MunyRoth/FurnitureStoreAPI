@@ -17,8 +17,8 @@ jobs:
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
-          password: ${{secrets.EC2_PASSWORD}}
+          password: ${{ secrets.EC2_PASSWORD }}
           script: |
             cd /home/roth/FurnitureStoreAPI
-            git pull origin main
+            git pull
 #            docker compose up --build -d
