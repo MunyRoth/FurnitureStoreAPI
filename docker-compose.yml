@@ -6,7 +6,7 @@ services:
         build:
             args:
                 user: roth
-                uid: 1000
+                uid: 1001
             context: ./
             dockerfile: Dockerfile
         image: furniture-store
