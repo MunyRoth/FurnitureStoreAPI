@@ -6,7 +6,7 @@ services:
         build:
             context: ./
             dockerfile: Dockerfile
-        command: bash -c "chmod -R 775 /var/www/storage && php-fpm"
+        entrypoint: bash -c "chmod -R 775 /var/www/storage && php-fpm"
         restart: unless-stopped
         working_dir: /var/www/
         volumes:
