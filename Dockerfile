@@ -1,8 +1,8 @@
 FROM php:8.2-fpm
 
 # Arguments defined in docker-compose.yml
-ENV user = roth
-ENV uid = 1000
+ARG user
+ARG uid
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
