@@ -4,9 +4,6 @@ name: furniture-store
 services:
     app:
         build:
-#            args:
-#                user: roth
-#                uid: 1000
             context: ./
             dockerfile: Dockerfile
         restart: unless-stopped
