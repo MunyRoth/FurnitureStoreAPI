@@ -22,8 +22,8 @@ class ProductController extends Controller
         // Get the authenticated user, if any
         $user = auth()->guard('api')->user();
 
-//        // Enable query logging
-//        DB::enableQueryLog();
+        // Enable query logging
+        DB::enableQueryLog();
 
         // Method 1
         // Determine the condition for the isFavorite column
@@ -54,14 +54,14 @@ class ProductController extends Controller
 //            $product->isFavorite = $product->isFavorite && $product->isFavorite->first();
 //        });
 
-//        // Get the executed queries
-//        $queries = DB::getQueryLog();
-//
-//        // Log the queries (for debugging purposes)
-//        Log::info('Executed Queries: ', $queries);
-//
-//        // Disable query logging to prevent interference with subsequent queries
-//        DB::disableQueryLog();
+        // Get the executed queries
+        $queries = DB::getQueryLog();
+
+        // Log the queries (for debugging purposes)
+        Log::info('Executed Queries: ', $queries);
+
+        // Disable query logging to prevent interference with subsequent queries
+        DB::disableQueryLog();
 
         // Return the response with the fetched data
         return $this->Res($data, 'got data successfully', 200);
