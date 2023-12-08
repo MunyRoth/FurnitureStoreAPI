@@ -26,7 +26,7 @@ services:
             MYSQL_DATABASE: ${DB_DATABASE}
             MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
         volumes:
-            - /var/mysql:/docker-entrypoint-initdb.d
+            - /var/lib/mysql:/var/lib/mysql
         networks:
             - furniture-store
 
