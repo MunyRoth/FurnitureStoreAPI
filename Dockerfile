@@ -23,4 +23,4 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www
 
 # Change permissions
-RUN chmod -R 755 /var/www/html
+RUN chmod -R 775 /var/www/storage/logs/
