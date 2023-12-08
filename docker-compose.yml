@@ -2,38 +2,49 @@ version: "3.8"
 name: furniture-store
 
 services:
-  app:
-    build:
-      context: ./
-      dockerfile: Dockerfile
-    networks:
-      - furniture-store
-    depends_on:
-        - db
+    app:
+        build:
+            args:
+                user: roth
+                uid: 1000
+            context: ./
+            dockerfile: Dockerfile
+        restart: unless-stopped
+        working_dir: /var/www/
+        volumes:
+            - ./:/var/www
+        networks:
+            - furniture-store
+        depends_on:
+            - db
 
-  db:
-    image: mysql:latest
-    environment:
-      MYSQL_DATABASE: ${DB_DATABASE}
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-    volumes:
-      - /var/mysql:/docker-entrypoint-initdb.d
-    networks:
-      - furniture-store
+    db:
+        image: mysql:latest
+        restart: unless-stopped
+        environment:
+            MYSQL_DATABASE: ${DB_DATABASE}
+            MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+        volumes:
+            - /var/mysql:/docker-entrypoint-initdb.d
+        networks:
+            - furniture-store
 
-  nginx:
-    build:
-      context: ./docker-compose/nginx
-      dockerfile: Dockerfile
-    ports:
-      - "8000:80"
-    volumes:
-      - ./docker-compose/nginx:/etc/nginx/conf.d/
-    networks:
-      - furniture-store
-    depends_on:
-        - app
+    nginx:
+        image: nginx:latest
+        #    build:
+        #      context: ./docker-compose/nginx
+        #      dockerfile: Dockerfile
+        restart: unless-stopped
+        ports:
+            - "80:80"
+        volumes:
+            - ./:/var/www
+            - ./docker-compose/nginx:/etc/nginx/conf.d/
+        networks:
+            - furniture-store
+#        depends_on:
+#            - app
 
 networks:
-  furniture-store:
-    driver: bridge
+    furniture-store:
+        driver: bridge
