@@ -31,8 +31,8 @@ class ProductController extends Controller
 
         // Fetch data from the products table, including the isFavorite column
         $data = $products
-//            ->select('products.id', 'products.name', 'products.price', 'products.imageUrl', DB::raw($isFavoriteCondition . ' as isFavorite'))
-//            ->leftJoin('favourites', 'products.id', '=', 'favourites.product_id')
+            ->select('products.id', 'products.name', 'products.price', 'products.imageUrl', DB::raw($isFavoriteCondition . ' as isFavorite'))
+            ->leftJoin('favourites', 'products.id', '=', 'favourites.product_id')
             ->get();
 
         // Method 2

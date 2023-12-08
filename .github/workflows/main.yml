@@ -1,4 +1,4 @@
-name: Cicd Auth
+name: Furniture Store CI/CD
 on:
   push:
     branches: ["main"]
@@ -21,4 +21,3 @@ jobs:
           script: |
             cd /home/roth/FurnitureStoreAPI
             git pull
-#            docker compose up --build -d
