@@ -22,9 +22,12 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /var/www
 
+# Create storage directory
+RUN mkdir -p storage/logs
+
 # Set ownership and permissions for storage directory
-RUN chown -R www-data:www-data /var/www/storage \
-    && chmod -R 775 /var/www/storage
+RUN chown -R www-data:www-data storage \
+    && chmod -R 775 storage
 
 # Create a volume for logs
 VOLUME /var/www/storage/logs
