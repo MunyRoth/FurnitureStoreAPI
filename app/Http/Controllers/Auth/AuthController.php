@@ -55,10 +55,7 @@ class AuthController extends Controller
         // send confirmation email
         event(new Registered($user));
 
-        // Create and set the expiration time for the access token
-        $data = $this->createToken($user);
-
-        return $this->Res($data, 'Registered successfully', 201);
+        return $this->Res(null, 'Registered successfully, Please check email for verify!', 201);
     }
 
     /**
