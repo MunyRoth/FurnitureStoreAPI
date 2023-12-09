@@ -7,7 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class SendOtpNotification extends Notification
+class SendOtpEmailNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -39,7 +39,7 @@ class SendOtpNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->line('The introduction to the notification.' . $this->verifyCode)
+            ->line('Use this OTP for verify email ' . $this->verifyCode . '.')
             ->line('Thank you for using our application!');
     }
 
