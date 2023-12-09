@@ -5,17 +5,19 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateProfileRequest;
 use App\Models\User;
+use App\Notifications\SendOtpNotification;
 use Carbon\Carbon;
 use Illuminate\Contracts\Auth\Guard;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
-
+use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-    protected $guard;
+    protected Guard $guard;
 
     public function __construct(Guard $guard)
     {
@@ -26,18 +28,17 @@ class AuthController extends Controller
      * Register a new user.
      *
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
+     * @throws ValidationException
      */
-    public function register(Request $request)
+    public function register(Request $request): JsonResponse
     {
-
         // Validate the request
         $this->validate($request, [
             'name' => 'required|string',
             'email' => 'required|string|email|max:255',
             'password' => 'required|min:8',
         ]);
-
 
         // Check if email is already registered
         if (User::where('email', $request->email)->exists()) {
@@ -51,6 +52,9 @@ class AuthController extends Controller
             'password' => Hash::make($request->password)
         ]);
 
+        // Send verify code to email
+        $this->sendVerifyCode($request->email);
+
         // Create and set the expiration time for the access token
         $data = $this->createToken($user);
 
@@ -61,9 +65,10 @@ class AuthController extends Controller
      * Login a user.
      *
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
+     * @throws ValidationException
      */
-    public function login(Request $request)
+    public function login(Request $request): JsonResponse
     {
         // Validate the request
         $this->validate($request, [
@@ -85,14 +90,14 @@ class AuthController extends Controller
     /**
      * store a user.
      *
-     * @param Request $request
+     * @param UpdateProfileRequest $request
+     * @return JsonResponse
      */
-    public function store(UpdateProfileRequest $request)
+    public function store(UpdateProfileRequest $request): JsonResponse
     {
         $user = Auth::guard('api')->user();
 
-    
-        try {   
+        try {
             if ($request->file('avatar')) {
                 // Upload the image to Cloudinary
                 $avatar = Cloudinary::upload($request->file('avatar')->getRealPath(), [
@@ -114,9 +119,9 @@ class AuthController extends Controller
     /**
      * Logout a user.
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function logout()
+    public function logout(): JsonResponse
     {
         // Revoke the user's access token
         auth()->user()->token()->revoke();
@@ -124,7 +129,12 @@ class AuthController extends Controller
         return $this->Res(null, 'Logged out successfully', 200);
     }
 
+    public function getProfile(): JsonResponse
+    {
+        $user = Auth::guard('api')->user();
 
+        return $this->Res($user, "Got data success", 200);
+    }
 
     /**
      * Create and set the expiration time for the access token.
@@ -132,7 +142,7 @@ class AuthController extends Controller
      * @param User $user
      * @return array
      */
-    private function createToken(User $user)
+    private function createToken(User $user): array
     {
         $tokenResult = $user->createToken('Personal Access Token');
         $token = $tokenResult->token;
@@ -146,10 +156,44 @@ class AuthController extends Controller
         ];
     }
 
-    public function getProfile()
+    public function verifyCode(Request $request): JsonResponse
     {
+        // Validate the request
+        $this->validate($request, [
+            'email' => 'required|string|email|max:255'
+        ]);
+
         $user = Auth::guard('api')->user();
 
-        return $this->Res($user, "Got data success", 200);
+        if ($user->hasVerifiedEmail()) {
+            return $this->Res(null, 'Email has been verified!', 200);
+        }
+
+        if ($user->verify_code == $request['verify_code']) {
+            $user->markEmailAsVerified();
+            // Revoke the user's access token
+            auth()->user()->token()->revoke();
+            // Create and set the expiration time for the access token
+            $accessToken = $this->createToken($user);
+            return $this->Res(['token' =>  $accessToken], 'Verification Successfully!', 200);
+        }
+        return $this->Res(null, "Code incorrect", 403);
+    }
+
+    //function send for otp Code
+    private function sendVerifyCode($email): JsonResponse
+    {
+        $user = User::where('email', $email)->first();
+        if ($user) {
+            $random_code = rand(10000, 99999);
+            $user->verify_code = $random_code;
+            $user->save();
+            //send code to mail
+            $user->notify(new SendOtpNotification($user->verify_code));
+
+            return $this->Res('null', "The code has been sent.", 200);
+        } else {
+            return $this->Res('null', 'Account not exist!', 403);
+        }
     }
 }
