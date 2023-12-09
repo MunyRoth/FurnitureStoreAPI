@@ -34,7 +34,7 @@ Route::middleware('guest')->group(function () {
         ->middleware('signed')
         ->name('verification.verify');
     // Verify email by using OTP
-    Route::post('email/verify', [VerificationController::class, 'verifyEmailByOTP'])
+    Route::post('email/verify/usingOTP', [VerificationController::class, 'verifyEmailByOTP'])
         ->middleware('throttle:6,1');
 
     // Forgot password
@@ -67,7 +67,7 @@ Route::middleware('auth:api')->group(function () {
     // Change user password
     Route::post('password/change', [PasswordController::class, 'changePassword']);
     // Resend link to verify email
-    Route::post('email/verify', [VerificationController::class, 'resendEmail'])
+    Route::post('email/verify/resend', [VerificationController::class, 'resendEmail'])
         ->middleware('throttle:6,1');
     // Resend OTP to verify email
     Route::post('email/verify/resendOTP', [VerificationController::class, 'resendOTP'])

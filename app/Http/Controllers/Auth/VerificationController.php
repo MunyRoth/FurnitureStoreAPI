@@ -62,9 +62,6 @@ class VerificationController extends Controller
         if ($user->otp == $request['otp']) {
             $user->markEmailAsVerified();
 
-            // Revoke the user's access token (optional)
-            auth()->user()->token()->revoke();
-
             // Create and set the expiration time for the access token (optional)
             $accessToken = $this->createToken($user);
 
