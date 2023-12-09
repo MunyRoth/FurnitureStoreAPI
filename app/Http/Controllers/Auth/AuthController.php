@@ -5,14 +5,13 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateProfileRequest;
 use App\Models\User;
-use Carbon\Carbon;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -53,11 +52,8 @@ class AuthController extends Controller
             'otp' => $this->generateOtp(),
         ]);
 
-        // Send the OTP email
-        $user->sendOtpEmail($user->otp);
-
-//        // send confirmation email
-//        event(new Registered($user));
+        // send confirmation email
+        event(new Registered($user));
 
         // Create and set the expiration time for the access token
         $data = $this->createToken($user);
@@ -143,105 +139,5 @@ class AuthController extends Controller
         $user = Auth::guard('api')->user();
 
         return $this->Res($user, "Got data success", 200);
-    }
-
-    /**
-     * Create and set the expiration time for the access token.
-     *
-     * @param User $user
-     * @return array
-     */
-    private function createToken(User $user): array
-    {
-        $tokenResult = $user->createToken('Personal Access Token');
-        $token = $tokenResult->token;
-        $token->expires_at = Carbon::now()->addWeeks(1);
-        $token->save();
-
-        return [
-            'token' => $tokenResult->accessToken,
-            'token_type' => 'Bearer',
-            'expires_at' => Carbon::parse($tokenResult->token->expires_at)->toDateTimeString(),
-        ];
-    }
-
-    /**
-     * Generate a random OTP.
-     *
-     * @param int $length
-     * @return string
-     */
-    function generateOtp(int $length = 6): string
-    {
-        // Generate a random string of specified length
-        $characters = '0123456789';
-        $otp = '';
-
-        for ($i = 0; $i < $length; $i++) {
-            $otp .= $characters[rand(0, strlen($characters) - 1)];
-        }
-
-        return $otp;
-    }
-
-    /**
-     * Resend the OTP email.
-     *
-     * @param $email
-     * @return void
-     */
-    private function resendVerifyCode($email): void
-    {
-        $user = User::where('email', $email)->first();
-        if ($user) {
-            $random_code = $this->generateOtp();
-            $user->verify_code = $random_code;
-            $user->save();
-            //send code to mail
-            $user->sendOtpEmail($random_code);
-
-            $this->Res('null', "The code has been sent.", 200);
-        } else {
-            $this->Res('null', 'Account not exist!', 403);
-        }
-    }
-
-    /**
-     * @param Request $request
-     * @return JsonResponse
-     * @throws ValidationException
-     */
-    public function verifyCode(Request $request): JsonResponse
-    {
-        // Validate the request
-        $this->validate($request, [
-            'email' => 'required|string|email|max:255',
-            'otp' => 'required|string|min:6|max:6', // Adjust the length as needed
-        ]);
-
-        $user = User::where('email', $request['email'])->first();
-
-        if (!$user) {
-            return $this->Res(null, 'Account not found', 404);
-        }
-
-        if ($user->hasVerifiedEmail()) {
-            return $this->Res(null, 'Email has been verified!', 200);
-        }
-
-        // Check if the provided OTP matches the one stored in the database
-        if ($user->otp == $request['otp']) {
-            $user->markEmailAsVerified();
-
-            // Revoke the user's access token (optional)
-            auth()->user()->token()->revoke();
-
-            // Create and set the expiration time for the access token (optional)
-            $accessToken = $this->createToken($user);
-
-            return $this->Res(['token' => $accessToken], 'Verification Successfully!', 200);
-        }
-
-        return $this->Res(null, "Code incorrect", 403);
     }
 }

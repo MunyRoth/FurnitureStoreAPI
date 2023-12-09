@@ -12,12 +12,14 @@ class ResetPasswordNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
+    private string $url;
+
     /**
      * Create a new notification instance.
      */
-    public function __construct()
+    public function __construct($url)
     {
-        //
+        $this->url = $url;
     }
 
     /**

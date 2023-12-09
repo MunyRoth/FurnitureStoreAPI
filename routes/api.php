@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Auth\PasswordController;
+use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\FavouriteController;
 use App\Http\Controllers\HistoryController;
@@ -27,6 +29,18 @@ Route::middleware('guest')->group(function () {
     // Login
     Route::post('login', [AuthController::class, 'login']);
 
+    // Verify email by clicking on the link
+    Route::get('email/verify/{id}/{hash}', [VerificationController::class, 'verifyEmailByLink'])
+        ->middleware('signed')
+        ->name('verification.verify');
+    // Verify email by using OTP
+    Route::post('email/verify', [VerificationController::class, 'verifyEmailByOTP'])
+        ->middleware('throttle:6,1');
+
+    // Forgot password
+    Route::post('password/forgot', [PasswordController::class, 'forgotPassword']);
+    Route::post('password/reset', [PasswordController::class, 'resetPassword']);
+
     // Product Routes
     Route::resource('products', ProductController::class)->only([
         'index',
@@ -50,6 +64,14 @@ Route::middleware('auth:api')->group(function () {
     Route::get('loadProfile', [AuthController::class, 'getProfile']);
     // Update user Profile
     Route::put('updateProfile', [AuthController::class, 'store']);
+    // Change user password
+    Route::post('password/change', [PasswordController::class, 'changePassword']);
+    // Resend link to verify email
+    Route::post('email/verify', [VerificationController::class, 'resendEmail'])
+        ->middleware('throttle:6,1');
+    // Resend OTP to verify email
+    Route::post('email/verify/resendOTP', [VerificationController::class, 'resendOTP'])
+        ->middleware('throttle:6,1');
 
     // Categories Routes
     Route::resource('categories', CategoriesController::class)->only([

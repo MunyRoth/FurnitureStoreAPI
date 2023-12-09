@@ -2,29 +2,33 @@
 
 namespace App\Notifications;
 
+use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Notification;
 
-class VerifyEmailNotification extends Notification implements ShouldQueue
+class VerifyEmailNotification extends VerifyEmail implements ShouldQueue
 {
     use Queueable;
+
+    public string $otp;
+
 
     /**
      * Create a new notification instance.
      */
-    public function __construct()
+    public function __construct($otp)
     {
-        //
+        $this->otp = $otp;
     }
+
 
     /**
      * Get the notification's delivery channels.
      *
      * @return array<int, string>
      */
-    public function via(object $notifiable): array
+    public function via($notifiable): array
     {
         return ['mail'];
     }
@@ -39,7 +43,9 @@ class VerifyEmailNotification extends Notification implements ShouldQueue
         return (new MailMessage)
             ->subject('ការផ្ទៀងផ្ទាត់អាសយដ្ឋានអ៊ីម៉ែល')
             ->greeting('សួស្តី, '.$notifiable->name.'!')
-            ->line('សូមចុចប៊ូតុងខាងក្រោមដើម្បីផ្ទៀងផ្ទាត់អាសយដ្ឋានអ៊ីមែលរបស់អ្នក។')
+            ->line('នេះជា OTP របស់អ្នក៖')
+            ->line($this->otp)
+            ->line('ឬ សូមចុចប៊ូតុងខាងក្រោមដើម្បីផ្ទៀងផ្ទាត់អាសយដ្ឋានអ៊ីមែលរបស់អ្នក។')
             ->action('ផ្ទៀងផ្ទាត់អាសយដ្ឋានអ៊ីម៉ែល', $verificationUrl)
             ->line('ប្រសិនបើអ្នកមិនបានបង្កើតគណនីទេ មិនចាំបាច់ចុច "ផ្ទៀងផ្ទាត់អាសយដ្ឋានអ៊ីម៉ែល" ទេ។');
     }

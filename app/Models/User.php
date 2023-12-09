@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Notifications\ResetPasswordNotification;
-use App\Notifications\SendOtpEmailNotification;
 use App\Notifications\VerifyEmailNotification;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -57,7 +56,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function sendEmailVerificationNotification(): void
     {
-        $this->notify(new VerifyEmailNotification());
+        $this->notify(new VerifyEmailNotification($this->otp));
     }
 
     /**
@@ -71,11 +70,6 @@ class User extends Authenticatable implements MustVerifyEmail
         $url = env('FRONT_URL').'/password/reset?token='.$token;
 
         $this->notify(new ResetPasswordNotification($url));
-    }
-
-    public function sendOtpEmail($otp): void
-    {
-        $this->notify(new SendOtpEmailNotification($otp));
     }
 
     public function shoppingCartProducts(): HasMany
