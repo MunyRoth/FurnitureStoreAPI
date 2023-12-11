@@ -64,6 +64,8 @@ class VerificationController extends Controller
             $user->otp_status == 'pending'
         ) {
             $user->markEmailAsVerified();
+            $user->otp_status = 'verified';
+            $user->save();
 
             // Create and set the expiration time for the access token (optional)
             $accessToken = $this->createToken($user);
