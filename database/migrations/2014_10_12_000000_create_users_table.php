@@ -19,6 +19,8 @@ return new class extends Migration
             $table->string('avatar')->nullable();
             $table->string('password');
             $table->string('otp')->nullable();
+            $table->datetime('otp_expired_at')->nullable();
+            $table->string('otp_status')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

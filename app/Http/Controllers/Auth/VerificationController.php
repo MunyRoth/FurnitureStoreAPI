@@ -59,7 +59,10 @@ class VerificationController extends Controller
         }
 
         // Check if the provided OTP matches the one stored in the database
-        if ($user->otp == $request['otp']) {
+        if ($user->otp == $request['otp'] &&
+            $user->otp_expires_at > now() &&
+            $user->otp_status == 'pending'
+        ) {
             $user->markEmailAsVerified();
 
             // Create and set the expiration time for the access token (optional)

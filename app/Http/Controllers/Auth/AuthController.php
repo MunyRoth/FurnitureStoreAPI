@@ -50,6 +50,8 @@ class AuthController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'otp' => $this->generateOtp(),
+            'otp_expires_at' => now()->addMinutes(), // Set OTP expiration time to 1 minute
+            'otp_status' => 'pending',
         ]);
 
         // send confirmation email
