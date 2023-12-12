@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Validation\ValidationException;
@@ -20,7 +19,7 @@ class VerificationController extends Controller
      * @return JsonResponse
      * @throws ValidationException
      */
-    public function verifyEmailByLink(Request $request): RedirectResponse
+    public function verifyEmailByLink(Request $request): JsonResponse
     {
         $user = User::find($request->route('id'));
 
@@ -60,7 +59,7 @@ class VerificationController extends Controller
 
         // Check if the provided OTP matches the one stored in the database
         if ($user->otp == $request['otp'] &&
-            $user->otp_expires_at > now() &&
+            $user->otp_expired_at > now() &&
             $user->otp_status == 'pending'
         ) {
             $user->markEmailAsVerified();
@@ -83,7 +82,7 @@ class VerificationController extends Controller
         return Response([
             'status' => 200,
             'message' => 'already resend email',
-            'data' => ''
+            'data' => null
         ], 200);
     }
 
@@ -97,15 +96,20 @@ class VerificationController extends Controller
     {
         $user = User::where('email', $email)->first();
         if ($user) {
-            $random_code = $this->generateOtp();
-            $user->otp = $random_code;
-            $user->save();
-            //send code to mail
-            $user->sendEmailVerificationNotification();
+            if ($user->otp_expired_at < now()) {
+                $user->otp = $this->generateOtp();
+                $user->otp_expired_at = now()->addMinutes();
+                $user->save();
+                //send code to mail
+                $user->sendEmailVerificationNotification();
 
-            $this->Res('null', "The code has been sent.", 200);
+                $this->Res(null, "The code has been sent.", 200);
+            } else {
+                $this->Res(null, "The code is already send, please wait 1 minute for resend code.", 200);
+            }
+
         } else {
-            $this->Res('null', 'Account not exist!', 403);
+            $this->Res(null, 'Account not exist!', 403);
         }
     }
 

@@ -50,7 +50,7 @@ class AuthController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'otp' => $this->generateOtp(),
-            'otp_expires_at' => now()->addMinutes(), // Set OTP expiration time to 1 minute
+            'otp_expired_at' => now()->addMinutes(), // Set OTP expiration time to 1 minute
             'otp_status' => 'pending',
         ]);
 
@@ -80,8 +80,18 @@ class AuthController extends Controller
             return $this->Res(null, "Invalid credentials", 400);
         }
 
-        // Check if the email is verified
-        if (!auth()->user()->hasVerifiedEmail()) {
+        // User
+        $user = User::findOrFail(auth()->user()->id);
+
+        // Check if the email is not verified
+        if (!$user->hasVerifiedEmail()) {
+            if ($user->otp_expired_at < now()) {
+                $user->otp = $this->generateOtp();
+                $user->otp_expired_at = now()->addMinutes();
+                $user->save();
+                $user->sendEmailVerificationNotification();
+                return $this->Res(null, "Email not verified, email has been resend.", 403);
+            }
             return $this->Res(null, "Email not verified", 403);
         }
 
