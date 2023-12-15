@@ -6,16 +6,24 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateProfileRequest;
 use App\Models\User;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+use Exception;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
 {
+    // Providers
+    private const PROVIDERS = [
+        'google'
+    ];
+
     protected Guard $guard;
 
     public function __construct(Guard $guard)
@@ -148,5 +156,74 @@ class AuthController extends Controller
         $user = Auth::guard('api')->user();
 
         return $this->Res($user, "Got data success", 200);
+    }
+
+    /**
+     * Social login:redirect to provider.
+     *
+     * @param $provider
+     * @return JsonResponse|RedirectResponse
+     */
+    public function redirectToProvider($provider): JsonResponse|RedirectResponse
+    {
+        // check if provider exists
+        if(!in_array($provider, self::PROVIDERS)){
+            return $this->Res(null, 'Provider not found', 404);
+        }
+
+        return redirect(Socialite::driver($provider)->stateless()->redirect()->getTargetUrl());
+    }
+
+    /**
+     * Social login:handle provider callback.
+     *
+     * @param $provider
+     * @return JsonResponse|RedirectResponse
+     */
+    public function handleProviderCallback($provider): JsonResponse|RedirectResponse
+    {
+        // check if provider exists
+        if(!in_array($provider, self::PROVIDERS)){
+            return $this->Res(null, 'Provider not found', 404);
+        }
+
+        try {
+            // get user from provider
+            $providerUser = Socialite::driver($provider)->stateless()->user();
+
+            // Check if user is already registered with this provider
+            $user = User::where('provider_name', $provider)
+                ->where('provider_id', $providerUser->getId())
+                ->first();
+
+            if ($user) {
+                return redirect(env('FRONT_URL') . '/login?token='.$user->createToken(env('APP_NAME') . ' Token')->accessToken);
+            }
+
+            // Check if user is already registered with this email
+            $userUpdate = User::where('email', $providerUser->getEmail())->first();
+            if ($userUpdate) {
+                // update user in database
+                $userUpdate->update([
+                    'provider_name' => $provider,
+                    'provider_id' => $providerUser->getId(),
+                    'avatar' => $providerUser->getAvatar(),
+                    'name' => $providerUser->getName()
+                ]);
+            } else {
+                // store user in database
+                $userUpdate = User::create([
+                    'provider_name' => $provider,
+                    'provider_id' => $providerUser->getId(),
+                    'avatar' => $providerUser->getAvatar(),
+                    'name' => $providerUser->getName(),
+                    'email' => $providerUser->getEmail(),
+                ]);
+            }
+
+            return redirect(env('FRONT_URL') . '/register?token='.$userUpdate->createToken(env('APP_NAME') . ' Token')->accessToken);
+        } catch (Exception $ex) {
+            return redirect(env('FRONT_URL') . '/error');
+        }
     }
 }

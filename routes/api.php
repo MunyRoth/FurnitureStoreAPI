@@ -29,6 +29,10 @@ Route::middleware('guest')->group(function () {
     // Login
     Route::post('login', [AuthController::class, 'login']);
 
+    // Social login
+    Route::get('auth/{provider}', [AuthController::class, 'redirectToProvider']);
+    Route::get('auth/{provider}/callback', [AuthController::class, 'handleProviderCallback']);
+
     // Verify email by clicking on the link
     Route::get('email/verify/{id}/{hash}', [VerificationController::class, 'verifyEmailByLink'])
         ->middleware('signed')

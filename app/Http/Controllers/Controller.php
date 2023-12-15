@@ -29,9 +29,9 @@ class Controller extends BaseController
      */
     public function createToken(User $user): array
     {
-        $tokenResult = $user->createToken('Personal Access Token');
+        $tokenResult = $user->createToken(env('APP_NAME') . ' Token');
         $token = $tokenResult->token;
-        $token->expires_at = Carbon::now()->addWeeks(1);
+        $token->expires_at = Carbon::now()->addWeeks();
         $token->save();
 
         return [
