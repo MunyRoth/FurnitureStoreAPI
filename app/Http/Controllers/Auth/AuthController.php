@@ -223,7 +223,8 @@ class AuthController extends Controller
 
             return redirect(env('FRONT_URL') . '/register?token='.$userUpdate->createToken(env('APP_NAME') . ' Token')->accessToken);
         } catch (Exception $ex) {
-            return redirect(env('FRONT_URL') . '/error');
+//            return redirect(env('FRONT_URL') . '/error');
+            return $this->Res(null, $ex->getMessage(), 500);
         }
     }
 }
