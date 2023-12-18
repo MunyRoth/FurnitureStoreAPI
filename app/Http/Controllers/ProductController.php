@@ -74,12 +74,12 @@ class ProductController extends Controller
 
         // Return the response with the fetched data
         return $this->Res(
-            $data->items(),
+            $data,
             'got data successfully',
             200,
-            $data->currentPage(),
-            $data->perPage(),
-            $data->total()
+//            $data->currentPage(),
+//            $data->perPage(),
+//            $data->total()
         );
     }
 
