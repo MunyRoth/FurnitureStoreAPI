@@ -42,7 +42,6 @@ class ProductController extends Controller
             ->where('products.name', 'LIKE', '%' . $search . '%')
             ->orderByDesc('products.updated_at')
             ->paginate($size, ['*'], 'page', $page);
-//        ->get();
 
         // Method 2
 //        $products = Product::get();
@@ -77,9 +76,9 @@ class ProductController extends Controller
             $data->items(),
             'got data successfully',
             200,
-//            $data->currentPage(),
-//            $data->perPage(),
-//            $data->total()
+            $data->currentPage(),
+            $data->perPage(),
+            $data->total()
         );
     }
 
