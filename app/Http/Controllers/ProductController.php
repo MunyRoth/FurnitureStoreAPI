@@ -22,6 +22,7 @@ class ProductController extends Controller
     {
         // Get the authenticated user, if any
         $user = auth()->guard('api')->user();
+        $id = $user->id;
 
         // Get the query parameters for pagination and search
         $page = $request->query('page', 1);
@@ -33,12 +34,15 @@ class ProductController extends Controller
 
         // Method 1
         // Determine the condition for the isFavorite column
-        $isFavoriteCondition = $user ? 'IF(favourites.user_id = ' . $user->id . ' OR favourites.product_id IS NOT NULL, favourites.is_favourited, 0)' : '0';
+        $isFavoriteCondition = $user ? 'IF(favourites.user_id = ' . $id . ' AND favourites.product_id IS NOT NULL, favourites.is_favourited, 0)' : '0';
 
         // Fetch data from the products table, including the isFavorite column
         $data = $products
             ->select('products.id', 'products.name', 'products.price', 'products.imageUrl', DB::raw($isFavoriteCondition . ' as isFavorite'))
-            ->leftJoin('favourites', 'products.id', '=', 'favourites.product_id')
+            ->leftJoin('favourites', function($join) use ($products, $id) {
+                $join->on('products.id', '=', 'favourites.product_id')
+                    ->where($id, '=', 'favourites.user_id');
+            })
             ->where('products.name', 'LIKE', '%' . $search . '%')
             ->orderByDesc('products.updated_at')
             ->paginate($size, ['*'], 'page', $page);
