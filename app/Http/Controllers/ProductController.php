@@ -40,8 +40,8 @@ class ProductController extends Controller
         $data = $products
             ->select('products.id', 'products.name', 'products.price', 'products.imageUrl', DB::raw($isFavoriteCondition . ' as isFavorite'))
             ->leftJoin('favourites', function($join) use ($products, $id) {
-                $join->on('products.id', '=', 'favourites.product_id')
-                    ->where($id, '=', 'favourites.user_id');
+                $join->on('favourites.product_id', '=', 'products.id')
+                    ->where('favourites.user_id', '=', $id);
             })
             ->where('products.name', 'LIKE', '%' . $search . '%')
             ->orderByDesc('products.updated_at')
