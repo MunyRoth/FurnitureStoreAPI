@@ -58,7 +58,7 @@ class AuthController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'otp' => $this->generateOtp(),
-            'otp_expired_at' => now()->addMinutes(), // Set OTP expiration time to 1 minute
+            'otp_expired_at' => now()->addHours(), // Set OTP expiration time to 1 minute
             'otp_status' => 'pending',
         ]);
 
@@ -95,7 +95,7 @@ class AuthController extends Controller
         if (!$user->hasVerifiedEmail()) {
             if ($user->otp_expired_at < now()) {
                 $user->otp = $this->generateOtp();
-                $user->otp_expired_at = now()->addMinutes();
+                $user->otp_expired_at = now()->addHours();
                 $user->save();
                 $user->sendEmailVerificationNotification();
                 return $this->Res(null, "Email not verified, email has been resend.", 403);

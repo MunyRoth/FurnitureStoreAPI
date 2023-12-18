@@ -98,7 +98,7 @@ class VerificationController extends Controller
         if ($user) {
             if ($user->otp_expired_at < now()) {
                 $user->otp = $this->generateOtp();
-                $user->otp_expired_at = now()->addMinutes();
+                $user->otp_expired_at = now()->addHours();
                 $user->save();
                 //send code to mail
                 $user->sendEmailVerificationNotification();
