@@ -13,8 +13,37 @@ class Controller extends BaseController
 {
     use AuthorizesRequests, ValidatesRequests;
 
-    public function Res(mixed $data, string $message, int $statusCode): JsonResponse
+    /**
+     * Create a JSON response.
+     *
+     * @param mixed $data
+     * @param int $currentPage
+     * @param int $perPage
+     * @param int $total
+     * @param string $message
+     * @param int $statusCode
+     * @return JsonResponse
+     */
+    public function Res(
+        mixed $data,
+        string $message = '',
+        int $statusCode = 200,
+        int $currentPage = 0,
+        int $perPage = 0,
+        int $total = 0,
+    ): JsonResponse
     {
+        if ($currentPage > 0 && $perPage > 0 && $total > 0) {
+            return response()->json([
+                'message' => $message,
+                'data' => $data,
+                'meta' => [
+                    'current_page' => $currentPage,
+                    'per_page' => $perPage,
+                    'total' => $total,
+                ]
+            ], $statusCode);
+        }
         return response()->json([
             'message' => $message,
             'data' => $data

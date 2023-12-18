@@ -13,7 +13,12 @@ class SearchController extends Controller
             'name' => 'required|string|max:15',
         ]);
 
-        $products = Product::where('name', 'LIKE', '%' . $request->name . '%')->get();
+        // Get the query parameters for pagination
+        $page = $request->query('page', 1);
+        $size = $request->query('size', 10);
+
+        $products = Product::where('name', 'LIKE', '%' . $request->name . '%')
+            ->paginate($size, ['*'], 'page', $page);
 
         // Use the isEmpty method to check if the collection is empty
         if ($products->isEmpty()) {

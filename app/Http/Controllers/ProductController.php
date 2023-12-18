@@ -9,6 +9,7 @@ use App\Models\Product;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -17,10 +18,15 @@ class ProductController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Product $products): JsonResponse
+    public function index(Product $products, Request $request): JsonResponse
     {
         // Get the authenticated user, if any
         $user = auth()->guard('api')->user();
+
+        // Get the query parameters for pagination and search
+        $page = $request->query('page', 1);
+        $size = $request->query('size', 10);
+        $search = $request->query('search');
 
         // Enable query logging
         DB::enableQueryLog();
@@ -33,7 +39,9 @@ class ProductController extends Controller
         $data = $products
             ->select('products.id', 'products.name', 'products.price', 'products.imageUrl', DB::raw($isFavoriteCondition . ' as isFavorite'))
             ->leftJoin('favourites', 'products.id', '=', 'favourites.product_id')
-            ->get();
+            ->where('products.name', 'LIKE', '%' . $search . '%')
+            ->orderByDesc('products.updated_at')
+            ->paginate($size, ['*'], 'page', $page);
 
         // Method 2
 //        $products = Product::get();
@@ -64,7 +72,14 @@ class ProductController extends Controller
         DB::disableQueryLog();
 
         // Return the response with the fetched data
-        return $this->Res($data, 'got data successfully', 200);
+        return $this->Res(
+            $data->items(),
+            'got data successfully',
+            200,
+            $data->currentPage(),
+            $data->perPage(),
+            $data->total()
+        );
     }
 
     /**
