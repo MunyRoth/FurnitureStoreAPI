@@ -17,7 +17,7 @@ class SearchController extends Controller
         $page = $request->query('page', 1);
         $size = $request->query('size', 10);
 
-        $data = Product::where('name', 'ILIKE', '%' . $request->name . '%')
+        $data = Product::where('name', 'LIKE', '%' . $request->name . '%')
             ->paginate($size, ['*'], 'page', $page);
 
         // Use the isEmpty method to check if the collection is empty
