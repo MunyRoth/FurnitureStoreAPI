@@ -17,14 +17,21 @@ class SearchController extends Controller
         $page = $request->query('page', 1);
         $size = $request->query('size', 10);
 
-        $products = Product::where('name', 'LIKE', '%' . $request->name . '%')
+        $data = Product::where('name', 'ILIKE', '%' . $request->name . '%')
             ->paginate($size, ['*'], 'page', $page);
 
         // Use the isEmpty method to check if the collection is empty
-        if ($products->isEmpty()) {
+        if ($data->isEmpty()) {
             return $this->Res(null, "Product not found", 404);
         }
 
-        return $this->Res($products, "Product found", 200);
+        return $this->Res(
+            $data->items(),
+            'got data successfully',
+            200,
+            $data->currentPage(),
+            $data->perPage(),
+            $data->total()
+        );
     }
 }
