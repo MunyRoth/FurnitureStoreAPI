@@ -42,6 +42,7 @@ class AuthController extends Controller
     {
         // Validate the request
         $this->validate($request, [
+            'avatar' => 'required|image|mimes:jpeg,jpg,png,gif|max:8191',
             'name' => 'required|string',
             'email' => 'required|string|email|max:255',
             'password' => 'required|min:8',
@@ -52,8 +53,14 @@ class AuthController extends Controller
             return $this->Res(null, 'Email is already registered', 400);
         }
 
+        // Upload the image to Cloudinary
+        $avatar = Cloudinary::upload($request->file('avatar')->getRealPath(), [
+            'folder' => 'FurnitureStore'
+        ])->getSecurePath();
+
         // Create a new user
         $user = User::create([
+            'avatar' => $avatar,
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
@@ -132,7 +139,7 @@ class AuthController extends Controller
                 $user->name = $request->name;
             }
             $user->save();
-            return $this->Res(null, "Update Profile Successfully", 200);
+            return $this->Res($user, "Update Profile Successfully", 200);
         } catch (\Exception $e) {
             return $this->Res(null, $e->getMessage(), 500);
         }

@@ -23,7 +23,7 @@ class UpdateProfileRequest extends FormRequest
     {
         return [
             'name' => 'string|max:255',
-            'avatar' => 'image|mimes:jpeg,png,jpg,gif|max:2048'
+            'avatar' => 'image|mimes:jpeg,jpg,png,gif|max:8191'
         ];
     }
 }
