@@ -19,7 +19,7 @@ class Controller extends BaseController
      * @param mixed $data
      * @param int $currentPage
      * @param int $perPage
-     * @param int $totalPage
+     * @param int $total
      * @param string $message
      * @param int $statusCode
      * @return JsonResponse
@@ -30,17 +30,17 @@ class Controller extends BaseController
         int    $statusCode = 200,
         int    $currentPage = 0,
         int    $perPage = 0,
-        int    $totalPage = 0,
+        int    $total = 0,
     ): JsonResponse
     {
-        if ($currentPage > 0 && $perPage > 0 && $totalPage > 0) {
+        if ($currentPage > 0 && $perPage > 0 && $total > 0) {
             return response()->json([
                 'message' => $message,
                 'data' => $data,
                 'meta' => [
                     'current_page' => $currentPage,
                     'per_page' => $perPage,
-                    'total_page' => $totalPage,
+                    'total' => $total,
                 ]
             ], $statusCode);
         }
