@@ -53,10 +53,13 @@ class AuthController extends Controller
             return $this->Res(null, 'Email is already registered', 400);
         }
 
-        // Upload the image to Cloudinary
-        $avatar = Cloudinary::upload($request->file('avatar')->getRealPath(), [
-            'folder' => 'FurnitureStore'
-        ])->getSecurePath();
+        $avatar = null;
+        if ($request->file('avatar') != null) {
+            // Upload the image to Cloudinary
+            $avatar = Cloudinary::upload($request->file('avatar')->getRealPath(), [
+                'folder' => 'FurnitureStore'
+            ])->getSecurePath();
+        }
 
         // Create a new user
         $user = User::create([
@@ -65,7 +68,7 @@ class AuthController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'otp' => $this->generateOtp(),
-            'otp_expired_at' => now()->addHours(), // Set OTP expiration time to 1 minute
+            'otp_expired_at' => now()->addHours(), // Set OTP expiration time to 1 hour
             'otp_status' => 'pending',
         ]);
 
