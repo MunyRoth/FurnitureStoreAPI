@@ -42,10 +42,10 @@ class AuthController extends Controller
     {
         // Validate the request
         $this->validate($request, [
-            'avatar' => 'required|image|mimes:jpeg,jpg,png,gif|max:8191',
+            'avatar' => 'image|mimes:jpeg,jpg,png,gif|max:8191',
             'name' => 'required|string',
             'email' => 'required|string|email|max:255',
-            'password' => 'required|min:8',
+            'password' => 'required|min:8|confirmed',
         ]);
 
         // Check if email is already registered
