@@ -24,7 +24,7 @@ class PasswordController extends Controller
         // validate the request
         $validator = Validator::make($request->all(), [
             'current_password' => 'required|string',
-            'password' => 'required|min:8|confirmed'
+            'new_password' => 'required|min:8|confirmed'
         ]);
 
         if ($validator->fails()){
@@ -42,7 +42,7 @@ class PasswordController extends Controller
                     'message' => 'check your old password',
                     'data' => ''
                 ], 400);
-            } else if ((Hash::check(request('password'), Auth::user()->password))) {
+            } else if ((Hash::check(request('new_password'), Auth::user()->password))) {
                 return Response([
                     'status' => 400,
                     'message' => 'please enter a password which is not similar then current password',
