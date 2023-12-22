@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\ChangePasswordRequest;
 use App\Models\User;
 use Exception;
 use Illuminate\Auth\Events\PasswordReset;
@@ -17,10 +16,24 @@ use Illuminate\Support\Str;
 
 class PasswordController extends Controller
 {
-    public function changePassword(ChangePasswordRequest $request): Response
+    public function changePassword(Request $request): Response
     {
         // get user id
         $userid = Auth::guard('api')->user()->id;
+
+        // validate the request
+        $validator = Validator::make($request->all(), [
+            'current_password' => 'required|string',
+            'password' => 'required|min:8|confirmed'
+        ]);
+
+        if ($validator->fails()){
+            return Response([
+                'status' => 400,
+                'message' => $validator->errors()->first(),
+                'data' => ''
+            ], 400);
+        }
 
         try {
             if (!(Hash::check(request('current_password'), Auth::user()->password))) {
