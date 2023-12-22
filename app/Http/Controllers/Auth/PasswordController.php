@@ -49,7 +49,7 @@ class PasswordController extends Controller
                     'data' => ''
                 ], 400);
             } else {
-                User::where('id', $userid)->update(['password' => Hash::make($request->password_confirmation)]);
+                User::where('id', $userid)->update(['password' => Hash::make($request->new_password)]);
                 return Response([
                     'status' => 200,
                     'message' => 'password updated successfully',
