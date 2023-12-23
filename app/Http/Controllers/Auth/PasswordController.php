@@ -38,16 +38,16 @@ class PasswordController extends Controller
         try {
             if (!(Hash::check(request('current_password'), Auth::user()->password))) {
                 return Response([
-                    'status' => 400,
+                    'status' => 200,
                     'message' => 'check your old password',
                     'data' => ''
-                ], 400);
+                ], 200);
             } else if ((Hash::check(request('new_password'), Auth::user()->password))) {
                 return Response([
-                    'status' => 400,
+                    'status' => 200,
                     'message' => 'please enter a password which is not similar then current password',
                     'data' => ''
-                ], 400);
+                ], 200);
             } else {
                 User::where('id', $userid)->update(['password' => Hash::make($request->new_password)]);
                 return Response([
