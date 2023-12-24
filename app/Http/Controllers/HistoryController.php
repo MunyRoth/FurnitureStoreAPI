@@ -6,6 +6,7 @@ use App\Models\Histories;
 use App\Models\ShoppingCart;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class HistoryController extends Controller
 {
@@ -14,8 +15,19 @@ class HistoryController extends Controller
      */
     public function index()
     {
-        $data = Histories::with(['product'])->where('user_id', auth()->id())->get();
-
+        $data = Histories::with(['product'])
+        ->select([
+            'id',
+            'product_id',
+            'user_id',
+            'qty',
+            DB::raw('DATE_FORMAT(created_at, "%y-%m-%d %H:%i:%s") as formatted_created_at'),
+            DB::raw('DATE_FORMAT(updated_at, "%y-%m-%d %H:%i:%s") as formatted_updated_at')
+        ])
+        ->where('user_id', auth()->id())
+        ->orderBy('updated_at', 'desc') 
+        ->orderBy('created_at', 'desc')
+        ->get();
         return $this->Res($data, 'got data successfully', 200);
     }
 
@@ -54,11 +66,24 @@ class HistoryController extends Controller
 
         // Move data to the history table
         foreach ($cartItems as $cartItem) {
-            Histories::create([
+            $existingHistory = Histories::where([
                 'product_id' => $cartItem->product_id,
                 'user_id' => Auth::id(),
-                'qty' => $cartItem->qty,
-            ]);
+            ])->first();
+
+            if ($existingHistory) {
+                // Update quantity if record already exists
+                $existingHistory->update([
+                    'qty' => $existingHistory->qty + $cartItem->qty,
+                ]);
+            } else {
+                // Create a new record if it doesn't exist
+                Histories::create([
+                    'product_id' => $cartItem->product_id,
+                    'user_id' => Auth::id(),
+                    'qty' => $cartItem->qty,
+                ]);
+            }
         }
 
         // Delete records from the shopping cart
