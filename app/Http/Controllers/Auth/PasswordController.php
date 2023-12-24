@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Exception;
 use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
@@ -16,7 +16,7 @@ use Illuminate\Support\Str;
 
 class PasswordController extends Controller
 {
-    public function changePassword(Request $request): Response
+    public function changePassword(Request $request): JsonResponse
     {
         // get user id
         $userid = Auth::guard('api')->user()->id;
@@ -28,44 +28,24 @@ class PasswordController extends Controller
         ]);
 
         if ($validator->fails()){
-            return Response([
-                'status' => 400,
-                'message' => $validator->errors()->first(),
-                'data' => ''
-            ], 400);
+            return $this->Res(null, $validator->errors()->first(), 400);
         }
 
         try {
             if (!(Hash::check(request('current_password'), Auth::user()->password))) {
-                return Response([
-                    'status' => 422,
-                    'message' => 'incorrect current password',
-                    'data' => ''
-                ], 422);
+                return $this->Res(null, 'Incorrect current password', 422);
             } else if ((Hash::check(request('new_password'), Auth::user()->password))) {
-                return Response([
-                    'status' => 400,
-                    'message' => 'new password should be different from the current password',
-                    'data' => ''
-                ], 400);
+                return $this->Res(null, 'New password should be different from the current password', 400);
             } else {
                 User::where('id', $userid)->update(['password' => Hash::make($request->new_password)]);
-                return Response([
-                    'status' => 200,
-                    'message' => 'password updated successfully',
-                    'data' => ''
-                ], 200);
+                return $this->Res(null, 'Password updated successfully');
             }
         } catch (Exception $ex) {
-            return Response([
-                'status' => 500,
-                'message' => $ex->errorInfo[2] ?? $ex->getMessage(),
-                'data' => ''
-            ], 500);
+            return $this->Res(null, $ex->errorInfo[2] ?? $ex->getMessage(), 500);
         }
     }
 
-    public function forgotPassword(Request $request): Response
+    public function forgotPassword(Request $request): JsonResponse
     {
         // validate the request
         $validator = Validator::make($request->all(), [
@@ -73,44 +53,24 @@ class PasswordController extends Controller
         ]);
 
         if ($validator->fails()){
-            return Response([
-                'status' => 400,
-                'message' => $validator->errors()->first(),
-                'data' => ''
-            ], 400);
+            return $this->Res(null, $validator->errors()->first(), 400);
         }
 
         try {
             $status = Password::sendResetLink($request->only('email'));
 
             return match ($status) {
-                Password::RESET_LINK_SENT => Response([
-                    'status' => 200,
-                    'message' => trans($status),
-                    'data' => ''
-                ], 200),
-                Password::INVALID_USER => Response([
-                    'status' => 400,
-                    'message' => trans($status),
-                    'data' => ''
-                ], 400),
-                default => Response([
-                    'status' => 200,
-                    'message' => 'send reset link successfully',
-                    'data' => ''
-                ], 200),
+                Password::RESET_LINK_SENT => $this->Res(null, trans($status)),
+                Password::INVALID_USER => $this->Res(null, trans($status), 400),
+                default => $this->Res(null, 'Send reset link successfully'),
             };
 
         } catch (\Swift_TransportException|Exception $ex) {
-            return Response([
-                'status' => 500,
-                'message' => $ex->getMessage(),
-                'data' => ''
-            ], 500);
+            return $this->Res(null, $ex->getMessage(), 500);
         }
     }
 
-    public function resetPassword(Request $request): Response
+    public function resetPassword(Request $request): JsonResponse
     {
         // validate the request
         $validator = Validator::make($request->all(), [
@@ -120,11 +80,7 @@ class PasswordController extends Controller
         ]);
 
         if ($validator->fails()){
-            return Response([
-                'status' => 400,
-                'message' => $validator->errors()->first(),
-                'data' => ''
-            ], 400);
+            return $this->Res(null, $validator->errors()->first(), 400);
         }
 
         $status = Password::reset(
@@ -141,17 +97,9 @@ class PasswordController extends Controller
         );
 
         if ($status == Password::PASSWORD_RESET) {
-            return Response([
-                'status' => 200,
-                'message'=> 'password reset successfully',
-                'data' => ''
-            ], 200);
+            return $this->Res(null, 'Password reset successfully');
         }
 
-        return Response([
-            'status' => 500,
-            'message'=> __($status),
-            'data' => ''
-        ], 500);
+        return $this->Res(null, __($status), 500);
     }
 }

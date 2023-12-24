@@ -7,7 +7,6 @@ use App\Models\User;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Validation\ValidationException;
 
 class VerificationController extends Controller
@@ -24,14 +23,14 @@ class VerificationController extends Controller
         $user = User::find($request->route('id'));
 
         if ($user->hasVerifiedEmail()) {
-            return $this->Res(null, 'Email has been verified!', 200);
+            return $this->Res(null, 'Email has been verified!');
         }
 
         if ($user->markEmailAsVerified()) {
             event(new Verified($user));
         }
 
-        return $this->Res($this->createToken($user), 'Verification Successfully!', 200);
+        return $this->Res($this->createToken($user), 'Verification Successfully!');
     }
 
     /**
@@ -75,15 +74,10 @@ class VerificationController extends Controller
         return $this->Res(null, "Incorrect OTP code. Please provide a valid one.", 422);
     }
 
-    public function resendEmail(Request $request): Response
+    public function resendEmail(Request $request): JsonResponse
     {
         $request->user()->sendEmailVerificationNotification();
-
-        return Response([
-            'status' => 200,
-            'message' => 'already resend email',
-            'data' => null
-        ], 200);
+        return $this->Res(null, 'Already resend email');
     }
 
     /**

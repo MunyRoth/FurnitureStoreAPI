@@ -172,13 +172,13 @@ class AuthController extends Controller
      * Social login:redirect to provider.
      *
      * @param $provider
-     * @return JsonResponse|RedirectResponse
+     * @return RedirectResponse
      */
-    public function redirectToProvider($provider): JsonResponse|RedirectResponse
+    public function redirectToProvider($provider): RedirectResponse
     {
         // check if provider exists
         if(!in_array($provider, self::PROVIDERS)){
-            return $this->Res(null, 'Provider not found', 404);
+            return redirect(env('FRONT_URL') . '/provider?status=404');
         }
 
         return redirect(Socialite::driver($provider)->stateless()->redirect()->getTargetUrl());
@@ -188,13 +188,13 @@ class AuthController extends Controller
      * Social login:handle provider callback.
      *
      * @param $provider
-     * @return JsonResponse|RedirectResponse
+     * @return RedirectResponse
      */
-    public function handleProviderCallback($provider): JsonResponse|RedirectResponse
+    public function handleProviderCallback($provider): RedirectResponse
     {
         // check if provider exists
         if(!in_array($provider, self::PROVIDERS)){
-            return $this->Res(null, 'Provider not found', 404);
+            return redirect(env('FRONT_URL') . '/provider?status=404');
         }
 
         try {
@@ -207,7 +207,7 @@ class AuthController extends Controller
                 ->first();
 
             if ($user) {
-                return redirect(env('FRONT_URL') . '/login?token='.$user->createToken(env('APP_NAME') . ' Token')->accessToken);
+                return redirect(env('FRONT_URL') . '/login?status=200&token='.$user->createToken(env('APP_NAME') . ' Token')->accessToken);
             }
 
             // Check if user is already registered with this email
@@ -231,10 +231,9 @@ class AuthController extends Controller
                 ]);
             }
 
-            return redirect(env('FRONT_URL') . '/register?token='.$userUpdate->createToken(env('APP_NAME') . ' Token')->accessToken);
+            return redirect(env('FRONT_URL') . '/register?status=201&token='.$userUpdate->createToken(env('APP_NAME') . ' Token')->accessToken);
         } catch (Exception $ex) {
-//            return redirect(env('FRONT_URL') . '/error');
-            return $this->Res(null, $ex->getMessage(), 500);
+            return redirect(env('FRONT_URL') . '/error?status=500%error=' . $ex->getMessage());
         }
     }
 }
