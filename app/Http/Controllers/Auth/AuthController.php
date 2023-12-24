@@ -50,7 +50,7 @@ class AuthController extends Controller
 
         // Check if email is already registered
         if (User::where('email', $request->email)->exists()) {
-            return $this->Res(null, 'Email is already registered', 400);
+            return $this->Res(null, 'Email is already registered', 409);
         }
 
         $avatar = null;
@@ -95,7 +95,7 @@ class AuthController extends Controller
 
         // Check email and password
         if (!auth()->attempt(['email' => $request->email, 'password' => $request->password])) {
-            return $this->Res(null, "Invalid credentials", 400);
+            return $this->Res(null, "Invalid credentials", 401);
         }
 
         // User
@@ -116,7 +116,7 @@ class AuthController extends Controller
         // Create and set the expiration time for the access token
         $data = $this->createToken($this->guard->user());
 
-        return $this->Res($data, "Logged in successfully", 200);
+        return $this->Res($data, "Logged in successfully");
     }
 
     /**
@@ -142,7 +142,7 @@ class AuthController extends Controller
                 $user->name = $request->name;
             }
             $user->save();
-            return $this->Res($user, "Update Profile Successfully", 200);
+            return $this->Res($user, "Update Profile Successfully");
         } catch (\Exception $e) {
             return $this->Res(null, $e->getMessage(), 500);
         }
@@ -158,14 +158,14 @@ class AuthController extends Controller
         // Revoke the user's access token
         auth()->user()->token()->revoke();
 
-        return $this->Res(null, 'Logged out successfully', 200);
+        return $this->Res(null, 'Logged out successfully');
     }
 
     public function getProfile(): JsonResponse
     {
         $user = Auth::guard('api')->user();
 
-        return $this->Res($user, "Got data success", 200);
+        return $this->Res($user, "Got data success");
     }
 
     /**

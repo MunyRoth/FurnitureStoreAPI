@@ -54,7 +54,7 @@ class VerificationController extends Controller
         }
 
         if ($user->hasVerifiedEmail()) {
-            return $this->Res(null, 'Email has been verified!', 200);
+            return $this->Res(null, 'Email has been verified!');
         }
 
         // Check if the provided OTP matches the one stored in the database
@@ -69,10 +69,10 @@ class VerificationController extends Controller
             // Create and set the expiration time for the access token (optional)
             $accessToken = $this->createToken($user);
 
-            return $this->Res($accessToken, 'Verification Successfully!', 200);
+            return $this->Res($accessToken, 'Verification Successfully!');
         }
 
-        return $this->Res(null, "Code incorrect", 403);
+        return $this->Res(null, "Incorrect OTP code. Please provide a valid one.", 422);
     }
 
     public function resendEmail(Request $request): Response
