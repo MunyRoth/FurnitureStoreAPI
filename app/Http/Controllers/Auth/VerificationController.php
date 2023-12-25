@@ -86,7 +86,7 @@ class VerificationController extends Controller
      * @param $email
      * @return void
      */
-    private function resendOTP($email): void
+    public function resendOTP($email): void
     {
         $user = User::where('email', $email)->first();
         if ($user) {
@@ -99,30 +99,11 @@ class VerificationController extends Controller
 
                 $this->Res(null, "The code has been sent.", 200);
             } else {
-                $this->Res(null, "The code is already send, please wait 1 minute for resend code.", 200);
+                $this->Res(null, "The code is already send, please wait 1 hour for resend code.", 200);
             }
 
         } else {
             $this->Res(null, 'Account not exist!', 403);
         }
-    }
-
-    /**
-     * Generate a random OTP.
-     *
-     * @param int $length
-     * @return string
-     */
-    function generateOtp(int $length = 6): string
-    {
-        // Generate a random string of specified length
-        $characters = '0123456789';
-        $otp = '';
-
-        for ($i = 0; $i < $length; $i++) {
-            $otp .= $characters[rand(0, strlen($characters) - 1)];
-        }
-
-        return $otp;
     }
 }

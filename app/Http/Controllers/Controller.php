@@ -76,7 +76,7 @@ class Controller extends BaseController
      * @param int $length
      * @return string
      */
-    public function generateOtp(int $length = 6): string
+    function generateOtp(int $length = 6): string
     {
         // Generate a random string of specified length
         $characters = '0123456789';

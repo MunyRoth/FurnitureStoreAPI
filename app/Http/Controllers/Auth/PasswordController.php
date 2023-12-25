@@ -61,7 +61,7 @@ class PasswordController extends Controller
 
             return match ($status) {
                 Password::RESET_LINK_SENT => $this->Res(null, trans($status)),
-                Password::INVALID_USER => $this->Res(null, trans($status), 400),
+                Password::INVALID_USER => $this->Res(null, trans($status), 404),
                 default => $this->Res(null, 'Send reset link successfully'),
             };
 
@@ -100,6 +100,6 @@ class PasswordController extends Controller
             return $this->Res(null, 'Password reset successfully');
         }
 
-        return $this->Res(null, __($status), 500);
+        return $this->Res(null, __($status), 400);
     }
 }
