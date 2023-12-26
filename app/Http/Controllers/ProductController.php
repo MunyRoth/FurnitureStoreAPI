@@ -127,10 +127,12 @@ class ProductController extends Controller
 
         try {
             if ($user) {
-                // Find the product by ID with its associated image URLs and the isFavorite column
-                $product = Product::with('imageUrls', 'isFavorite')->findOrFail($id);
+                // Find the product by ID with its associated image URLs and the isFavorite column for the authenticated user
+                $product = Product::with(['imageUrls', 'isFavorite' => function ($query) use ($user) {
+                    $query->where('user_id', $user->id);
+                }])->findOrFail($id);
             } else {
-                // Find the product by ID with its associated image URLs
+                // Find the product by ID with its associated image URLs (without isFavorite information for non-authenticated users)
                 $product = Product::with('imageUrls')->findOrFail($id);
             }
             return $this->Res($product, 'gotten successfully', 200);
