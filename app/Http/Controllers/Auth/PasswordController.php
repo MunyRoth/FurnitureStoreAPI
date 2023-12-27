@@ -3,16 +3,16 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Mail\PasswordResetMail;
 use App\Models\User;
 use Exception;
-use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
 
 class PasswordController extends Controller
 {
@@ -27,7 +27,7 @@ class PasswordController extends Controller
             'new_password' => 'required|min:8|confirmed'
         ]);
 
-        if ($validator->fails()){
+        if ($validator->fails()) {
             return $this->Res(null, $validator->errors()->first(), 400);
         }
 
@@ -57,15 +57,23 @@ class PasswordController extends Controller
         }
 
         try {
-            $status = Password::sendResetLink($request->only('email'));
+            // Generate and store OTP
+            $otp = $this->generateOTP();
+            Cache::put('password_reset_' . $request->email, $otp, now()->addMinutes(15));
 
-            return match ($status) {
-                Password::RESET_LINK_SENT => $this->Res(null, trans($status)),
-                Password::INVALID_USER => $this->Res(null, trans($status), 404),
-                default => $this->Res(null, 'Send reset link successfully'),
-            };
+            // Send password reset email
+//            $resetLink = route('password.reset', ['otp' => $otp, 'email' => $request->email]);
+            $resetLink = 'http://localhost:3000/reset-password?otp=' . $otp . '&email=' . $request->email;
+            $user = User::where('email', $request->email)->first();
 
-        } catch (\Swift_TransportException|Exception $ex) {
+            if (!$user) {
+                return $this->Res(null, 'Account not found', 404);
+            }
+
+            Mail::to($request->email)->send(new PasswordResetMail($user, $otp, $resetLink));
+
+            return $this->Res(null, 'Password reset email sent successfully');
+        } catch (Exception $ex) {
             return $this->Res(null, $ex->getMessage(), 500);
         }
     }
@@ -74,32 +82,36 @@ class PasswordController extends Controller
     {
         // validate the request
         $validator = Validator::make($request->all(), [
-            'token' => 'required|string',
             'email' => 'required|email|max:255',
+            'otp' => 'required|string',
             'password' => 'required|min:8|confirmed'
         ]);
 
-        if ($validator->fails()){
+        if ($validator->fails()) {
             return $this->Res(null, $validator->errors()->first(), 400);
         }
 
-        $status = Password::reset(
-            $request->only('email', 'password', 'password_confirmation', 'token'),
-            function (User $user, string $password) {
-                $user->forceFill([
-                    'password' => Hash::make($password)
-                ])->setRememberToken(Str::random(60));
+        // Validate OTP
+        $storedOtp = Cache::get('password_reset_' . $request->email);
 
-                $user->save();
-
-                event(new PasswordReset($user));
-            }
-        );
-
-        if ($status == Password::PASSWORD_RESET) {
-            return $this->Res(null, 'Password reset successfully');
+        if (!$storedOtp || $storedOtp !== $request->otp) {
+            return $this->Res(null, 'Invalid OTP', 422);
         }
 
-        return $this->Res(null, __($status), 400);
+        // OTP is valid, proceed with password reset
+        try {
+            $user = User::where('email', $request->email)->first();
+
+            // Update password
+            $user->update([
+                'password' => Hash::make($request->password),
+            ]);
+
+            // Remove stored OTP after successful password reset
+            Cache::forget('password_reset_' . $request->email);
+            return $this->Res(null, 'Password reset successfully');
+        } catch (Exception $ex) {
+            return $this->Res(null, $ex->getMessage(), 500);
+        }
     }
 }

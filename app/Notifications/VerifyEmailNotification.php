@@ -41,13 +41,13 @@ class VerifyEmailNotification extends VerifyEmail implements ShouldQueue
         $verificationUrl = $this->verificationUrl($notifiable);
 
         return (new MailMessage)
-            ->subject('ការផ្ទៀងផ្ទាត់អាសយដ្ឋានអ៊ីម៉ែល')
-            ->greeting('សួស្តី, '.$notifiable->name.'!')
-            ->line('នេះជា OTP របស់អ្នក៖')
-            ->line($this->otp)
-            ->line('ឬ សូមចុចប៊ូតុងខាងក្រោមដើម្បីផ្ទៀងផ្ទាត់អាសយដ្ឋានអ៊ីមែលរបស់អ្នក។')
-            ->action('ផ្ទៀងផ្ទាត់អាសយដ្ឋានអ៊ីម៉ែល', $verificationUrl)
-            ->line('ប្រសិនបើអ្នកមិនបានបង្កើតគណនីទេ មិនចាំបាច់ចុច "ផ្ទៀងផ្ទាត់អាសយដ្ឋានអ៊ីម៉ែល" ទេ។');
+            ->subject('Email Verification')
+            ->markdown('mail.verify_email',
+                [
+                    'user' => $notifiable,
+                    'otp' => $this->otp,
+                    'url' => $verificationUrl
+                ]);
     }
 
     /**

@@ -62,6 +62,7 @@ class VerificationController extends Controller
             $user->otp_status == 'pending'
         ) {
             $user->markEmailAsVerified();
+            $user->otp = null; // Clear OTP after successful reset
             $user->otp_status = 'verified';
             $user->save();
 
