@@ -7,6 +7,7 @@ use App\Mail\PasswordResetMail;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -52,7 +53,7 @@ class PasswordController extends Controller
             'email' => 'required|email|max:255',
         ]);
 
-        if ($validator->fails()){
+        if ($validator->fails()) {
             return $this->Res(null, $validator->errors()->first(), 400);
         }
 
@@ -62,8 +63,7 @@ class PasswordController extends Controller
             Cache::put('password_reset_' . $request->email, $otp, now()->addMinutes(15));
 
             // Send password reset email
-//            $resetLink = route('password.reset', ['otp' => $otp, 'email' => $request->email]);
-            $resetLink = 'http://localhost:3000/reset-password?otp=' . $otp . '&email=' . $request->email;
+            $resetLink = route('password.check', ['otp' => $otp, 'email' => $request->email]);
             $user = User::where('email', $request->email)->first();
 
             if (!$user) {
@@ -78,12 +78,34 @@ class PasswordController extends Controller
         }
     }
 
-    public function resetPassword(Request $request): JsonResponse
+    public function checkOtp(Request $request): JsonResponse | RedirectResponse
     {
-        // validate the request
+        // Validate the request
         $validator = Validator::make($request->all(), [
             'email' => 'required|email|max:255',
-            'otp' => 'required|string',
+            'otp' => 'required|string|min:6|max:6',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->Res(null, $validator->errors()->first(), 400);
+        }
+
+        // Validate OTP
+        $storedOtp = Cache::get('password_reset_' . $request->email);
+
+        if (!$storedOtp || $storedOtp !== $request->otp) {
+            return $this->Res(null, 'Invalid OTP', 422);
+        }
+
+        return redirect(env('FRONT_URL') . '/password/reset?email='.$request->email.'&otp='.$request->otp);
+    }
+
+    public function resetPassword(Request $request): JsonResponse
+    {
+        // Validate the request
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email|max:255',
+            'otp' => 'required|string|min:6|max:6',
             'password' => 'required|min:8|confirmed'
         ]);
 

@@ -30,7 +30,7 @@ class VerificationController extends Controller
             event(new Verified($user));
         }
 
-        return $this->Res($this->createToken($user), 'Verification Successfully!');
+        return $this->Res(null, 'Verification Successfully!');
     }
 
     /**
