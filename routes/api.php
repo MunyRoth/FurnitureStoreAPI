@@ -46,6 +46,7 @@ Route::middleware('guest')->group(function () {
     Route::post('password/reset', [PasswordController::class, 'resetPassword']);
     Route::get('password/check', [PasswordController::class, 'checkOtp'])
         ->name('password.check');
+    Route::post('password/verifyOTP', [PasswordController::class, 'verifyOTP']);
 
     // Product Routes
     Route::resource('products', ProductController::class)->only([

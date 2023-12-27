@@ -100,6 +100,28 @@ class PasswordController extends Controller
         return redirect(env('FRONT_URL') . '/password/reset?email='.$request->email.'&otp='.$request->otp);
     }
 
+    public function verifyOTP(Request $request): JsonResponse
+    {
+        // Validate the request
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email|max:255',
+            'otp' => 'required|string|min:6|max:6',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->Res(null, $validator->errors()->first(), 400);
+        }
+
+        // Validate OTP
+        $storedOtp = Cache::get('password_reset_' . $request->email);
+
+        if (!$storedOtp || $storedOtp !== $request->otp) {
+            return $this->Res(null, 'Invalid OTP', 422);
+        }
+
+        return $this->Res(null, 'OTP verified successfully');
+    }
+
     public function resetPassword(Request $request): JsonResponse
     {
         // Validate the request
