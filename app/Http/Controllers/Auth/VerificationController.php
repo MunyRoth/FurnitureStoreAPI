@@ -84,12 +84,17 @@ class VerificationController extends Controller
     /**
      * Resend the OTP email.
      *
-     * @param $email
-     * @return void
+     * @param Request $request
+     * @return JsonResponse
+     * @throws ValidationException
      */
-    public function resendOTP($email): void
+    public function resendOTP(Request $request): JsonResponse
     {
-        $user = User::where('email', $email)->first();
+        $this->validate($request, [
+            'email' => 'required|string|email|max:255',
+        ]);
+
+        $user = User::where('email', $request->email)->first();
         if ($user) {
             if ($user->otp_expired_at < now()) {
                 $user->otp = $this->generateOtp();
@@ -98,13 +103,13 @@ class VerificationController extends Controller
                 //send code to mail
                 $user->sendEmailVerificationNotification();
 
-                $this->Res(null, "The code has been sent.", 200);
+                return $this->Res(null, "The code has been sent.");
             } else {
-                $this->Res(null, "The code is already send, please wait 1 hour for resend code.", 200);
+                return $this->Res(null, "The code is already send, please wait 5 minutes for resend code.");
             }
 
         } else {
-            $this->Res(null, 'Account not exist!', 403);
+            return $this->Res(null, 'Account not exist!', 403);
         }
     }
 }
