@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateProductRequest;
 use App\Models\Image;
 use App\Models\Product;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -174,6 +175,9 @@ class ProductController extends Controller
         } catch (ModelNotFoundException $e) {
             // Return a not found response if the product is not found
             return $this->Res(null, 'not found', 404);
+        } catch (Exception $e) {
+            // Handle exceptions, log errors, or return an appropriate response
+            return $this->Res(null, $e->getMessage(), 500);
         }
     }
 
