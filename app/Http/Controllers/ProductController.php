@@ -39,7 +39,7 @@ class ProductController extends Controller
         // Fetch data from the products table, including the isFavorite column
         $data = $products
             ->select('products.id', 'products.name', 'products.price', 'products.imageUrl', DB::raw($isFavoriteCondition . ' as isFavorite'))
-            ->leftJoin('favourites', function($join) use ($products, $id) {
+            ->leftJoin('favourites', function ($join) use ($products, $id) {
                 $join->on('favourites.product_id', '=', 'products.id')
                     ->where('favourites.user_id', '=', $id);
             })
@@ -149,6 +149,22 @@ class ProductController extends Controller
         try {
             // Find the product by ID
             $product = Product::findOrFail($id);
+
+            if ($request->hasFile('image') && $request->file('image')->isValid()) {
+
+                // Validate file type and size if needed
+                $request->validate([
+                    'image' => 'image|mimes:jpeg,png,jpg,gif|max:8048',
+                ]);
+
+                // Upload the image to Cloudinary
+                $imageUrl = Cloudinary::upload($request->file('image')->getRealPath(), [
+                    'folder' => 'FurnitureStore'
+                ])->getSecurePath();
+
+                $product->imageUrl = $imageUrl;
+                $product->save();
+            }
 
             // Update the product with the specified data
             $product->update($request->only(['name', 'price', 'description']));
