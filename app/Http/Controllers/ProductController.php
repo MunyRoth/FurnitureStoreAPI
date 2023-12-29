@@ -210,7 +210,7 @@ class ProductController extends Controller
 
             // Validate file type and size if needed
             $request->validate([
-                'image' => 'require|image|mimes:jpeg,png,jpg,gif|max:8048',
+                'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:8048',
             ]);
 
             // Upload the image to Cloudinary
