@@ -95,6 +95,8 @@ Route::middleware('auth:api')->group(function () {
         'destroy'
     ]);
 
+    Route::post('products/{id}/uploadImage', [ProductController::class, 'uploadImage']);
+
     // Custom ShoppingCart Routes
     Route::controller(ShoppingCartController::class)->group(function () {
         Route::get('/shoppingCartUnPaid', 'retrieveAllProductUnPaid');

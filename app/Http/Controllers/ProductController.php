@@ -198,4 +198,40 @@ class ProductController extends Controller
             return $this->Res(null, 'not found', 404);
         }
     }
+
+    /**
+     * Upload the specified image to Cloudinary.
+     */
+    public function uploadImage(Request $request, $id): JsonResponse
+    {
+        try {
+            // Find the product by ID
+            $product = Product::findOrFail($id);
+
+            // Validate file type and size if needed
+            $request->validate([
+                'image' => 'require|image|mimes:jpeg,png,jpg,gif|max:8048',
+            ]);
+
+            // Upload the image to Cloudinary
+            $imageUrl = Cloudinary::upload($request->file('image')->getRealPath(), [
+                'folder' => 'FurnitureStore'
+            ])->getSecurePath();
+
+            // Create and save a new image record associated with the product
+            $image = new Image;
+            $image->product_id = $id;
+            $image->imageUrl = $imageUrl;
+            $image->save();
+
+            // Return the response with the updated product data
+            return $this->Res($product, 'updated successfully', 200);
+        } catch (ModelNotFoundException $e) {
+            // Return a not found response if the product is not found
+            return $this->Res(null, 'not found', 404);
+        } catch (Exception $e) {
+            // Handle exceptions, log errors, or return an appropriate response
+            return $this->Res(null, $e->getMessage(), 500);
+        }
+    }
 }
