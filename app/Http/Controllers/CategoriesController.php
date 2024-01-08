@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class CategoriesController extends Controller
 {
@@ -65,15 +66,22 @@ class CategoriesController extends Controller
     // Retrieve products that belong to a specific category
     public function retrieveCategoryById($id): JsonResponse
     {
-        // Find the category by ID and eager load its products
-        $data = Category::find($id)->load('products');
-
-        // Check if category data is empty
-        if (!$data) {
-            return $this->Res($data, 'Data is empty', 200);
+        if (auth()->guard('api')->user()) {
+            // Find the category by ID and eager load its products
+            $data = Category::with(['products', 'products.isFavorite:product_id,is_favourited'])->find($id);
+            // Check if category data is empty
+            if (!$data) {
+                return $this->Res($data, 'Data is empty', 200);
+            }
+            // Return a successful response with the category and its products
+            return $this->Res($data, 'Data retrieved successfully', 200);
+        } else {
+            $data = Category::find($id)->load(['products', 'products']);
+            // Check if category data is empty
+            if (!$data) {
+                return $this->Res($data, 'Data is empty', 200);
+            }
+            return $this->Res($data, 'Data retrieved successfully', 200);
         }
-
-        // Return a successful response with the category and its products
-        return $this->Res($data, 'Data retrieved successfully', 200);
     }
 }

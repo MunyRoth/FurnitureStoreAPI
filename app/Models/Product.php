@@ -22,7 +22,7 @@ class Product extends Model
 
     public function isFavorite(): HasOne
     {
-        return $this->hasOne(Favourite::class);
+        return $this->hasOne(Favourite::class, 'product_id');
     }
 
     public function imageUrls(): HasMany
