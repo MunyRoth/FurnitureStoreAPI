@@ -93,8 +93,10 @@ class AuthController extends Controller
             'password' => 'required|min:8'
         ]);
 
+        $credentials = $request->only(['email', 'password']);
+
         // Check email and password
-        if (!auth()->attempt(['email' => $request->email, 'password' => $request->password])) {
+        if (!auth()->attempt($credentials)) {
             return $this->Res(null, "Invalid credentials", 401);
         }
 

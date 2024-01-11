@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\FavouriteController;
 use App\Http\Controllers\HistoryController;
+use App\Http\Controllers\ImageSliderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\ShoppingCartController;
@@ -52,8 +53,11 @@ Route::middleware('guest')->group(function () {
         ->name('password.check');
     Route::post('password/verifyOTP', [PasswordController::class, 'verifyOTP']);
 
+    // Image Slider Routes
+    Route::apiResource('imageSlider', ImageSliderController::class);
+
     // Product Routes
-    Route::resource('products', ProductController::class)->only([
+    Route::apiResource('products', ProductController::class)->only([
         'index',
         'show',
     ]);
@@ -82,14 +86,14 @@ Route::middleware('auth:api')->group(function () {
         ->middleware('throttle:6,1');
 
     // Categories Routes
-    Route::resource('categories', CategoriesController::class)->only([
+    Route::apiResource('categories', CategoriesController::class)->only([
         'store',
         'update',
         'destroy'
     ]);
 
     // Product Routes
-    Route::resource('products', ProductController::class)->only([
+    Route::apiResource('products', ProductController::class)->only([
         'store',
         'update',
         'destroy'
@@ -108,7 +112,7 @@ Route::middleware('auth:api')->group(function () {
     });
 
     // Payment Methods Routes
-    Route::resource('history', HistoryController::class)->only([
+    Route::apiResource('history', HistoryController::class)->only([
         'index',
         'store',
         'show',
@@ -119,7 +123,7 @@ Route::middleware('auth:api')->group(function () {
 
 
     // Favourite Routes
-    Route::resource('favorite', FavouriteController::class)->only([
+    Route::apiResource('favorite', FavouriteController::class)->only([
         'index',
         'store'
     ]);
