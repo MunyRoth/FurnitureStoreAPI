@@ -112,8 +112,11 @@ Route::middleware('auth:api')->group(function () {
         'index',
         'store',
         'show',
-        'update'
+        'update',
     ]);
+
+    Route::delete('history', [HistoryController::class, 'destroy']);
+
 
     // Favourite Routes
     Route::resource('favorite', FavouriteController::class)->only([
