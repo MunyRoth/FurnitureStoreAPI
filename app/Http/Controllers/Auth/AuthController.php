@@ -14,6 +14,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Validation\ValidationException;
 use Laravel\Socialite\Facades\Socialite;
 
@@ -179,7 +180,7 @@ class AuthController extends Controller
     public function redirectToProvider($provider): RedirectResponse
     {
         // check if provider exists
-        if(!in_array($provider, self::PROVIDERS)){
+        if (!in_array($provider, self::PROVIDERS)) {
             return redirect(env('FRONT_URL') . '/provider?status=404');
         }
 
@@ -195,7 +196,7 @@ class AuthController extends Controller
     public function handleProviderCallback($provider): RedirectResponse
     {
         // check if provider exists
-        if(!in_array($provider, self::PROVIDERS)){
+        if (!in_array($provider, self::PROVIDERS)) {
             return redirect(env('FRONT_URL') . '/provider?status=404');
         }
 
@@ -209,8 +210,10 @@ class AuthController extends Controller
                 ->first();
 
             if ($user) {
-                return redirect(env('FRONT_URL') . '/login?status=200&token='.$user->createToken(env('APP_NAME') . ' Token')->accessToken);
+                return redirect(env('FRONT_URL') . '/login?status=200&token=' . $user->createToken(env('APP_NAME') . ' Token')->accessToken);
             }
+
+            $token2 = null;
 
             // Check if user is already registered with this email
             $userUpdate = User::where('email', $providerUser->getEmail())->first();
@@ -231,9 +234,26 @@ class AuthController extends Controller
                     'name' => $providerUser->getName(),
                     'email' => $providerUser->getEmail(),
                 ]);
+
+                // call api
+                $res = Http::post("https://kunapheap.com/auth/sign-up", [
+                    'username' => $providerUser->getEmail(),
+                    'password' => '12345',
+                    'email' => $providerUser->getEmail(),
+                    'gender' => 'male',
+                    'dob' => '1990-12-31T23:00:00z',
+                ]);
+
+                $token2 = $res->json()['data']['token'];
             }
 
-            return redirect(env('FRONT_URL') . '/register?status=201&token='.$userUpdate->createToken(env('APP_NAME') . ' Token')->accessToken);
+            return redirect(
+                env('FRONT_URL')
+                . '/register?status=201&token='
+                . $userUpdate->createToken(env('APP_NAME')
+                    . ' Token')->accessToken
+                . '&token2=' . $token2
+            );
         } catch (Exception $ex) {
             return redirect(env('FRONT_URL') . '/error?status=500%error=' . $ex->getMessage());
         }
