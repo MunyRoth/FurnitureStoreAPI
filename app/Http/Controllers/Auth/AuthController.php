@@ -210,7 +210,21 @@ class AuthController extends Controller
                 ->first();
 
             if ($user) {
-                return redirect(env('FRONT_URL') . '/login?status=200&token=' . $user->createToken(env('APP_NAME') . ' Token')->accessToken);
+                // call api
+                $res = Http::post("https://kunapheap.com/auth/sign-in", [
+                    'username' => $providerUser->getEmail(),
+                    'password' => '12345'
+                ]);
+
+                $token2 = $res->json()['data']['token'];
+
+                return redirect(
+                    env('FRONT_URL')
+                    . '/login?status=200&token='
+                    . $user->createToken(env('APP_NAME')
+                        . ' Token')->accessToken
+                    . '&token2=' . $token2
+                );
             }
 
             $token2 = null;
