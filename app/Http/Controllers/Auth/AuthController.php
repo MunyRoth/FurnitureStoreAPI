@@ -211,12 +211,15 @@ class AuthController extends Controller
 
             if ($user) {
                 // call api
-                $res = Http::post("https://kunapheap.com/auth/sign-in", [
-                    'username' => $providerUser->getEmail(),
-                    'password' => '12345'
-                ]);
-
-                $token2 = $res->json()['data']['token'];
+                try {
+                    $res = Http::post("https://kunapheap.com/auth/sign-in", [
+                        'username' => $providerUser->getEmail(),
+                        'password' => '12345'
+                    ]);
+                    $token2 = $res->json()['data']['token'];
+                } catch (Exception $ex) {
+                    $token2 = null;
+                }
 
                 return redirect(
                     env('FRONT_URL')
@@ -226,8 +229,6 @@ class AuthController extends Controller
                     . '&token2=' . $token2
                 );
             }
-
-            $token2 = null;
 
             // Check if user is already registered with this email
             $userUpdate = User::where('email', $providerUser->getEmail())->first();
@@ -250,15 +251,19 @@ class AuthController extends Controller
                 ]);
 
                 // call api
-                $res = Http::post("https://kunapheap.com/auth/sign-up", [
-                    'username' => $providerUser->getEmail(),
-                    'password' => '12345',
-                    'email' => $providerUser->getEmail(),
-                    'gender' => 'male',
-                    'dob' => '1990-12-31T23:00:00z',
-                ]);
+                try {
+                    $res = Http::post("https://kunapheap.com/auth/sign-up", [
+                        'username' => $providerUser->getEmail(),
+                        'password' => '12345',
+                        'email' => $providerUser->getEmail(),
+                        'gender' => 'male',
+                        'dob' => '1990-12-31T23:00:00z',
+                    ]);
 
-                $token2 = $res->json()['data']['token'];
+                    $token2 = $res->json()['data']['token'];
+                } catch (Exception $ex) {
+                    $token2 = null;
+                }
             }
 
             return redirect(
